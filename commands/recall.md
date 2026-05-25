@@ -1,17 +1,17 @@
 ---
-description: Cerca semanticamente in tutte le memorie (globali + tutti i progetti)
-argument-hint: "<query in linguaggio naturale>"
+description: Semantic search across all memories (global + every project)
+argument-hint: "<natural-language query>"
 ---
 
-# /recall — Ricerca semantica cross-project
+# /recall — Cross-project semantic search
 
-Cerca nelle memorie (globali + tutti i progetti Claude Code registrati) le entry più rilevanti per la query.
+Search across all memories (global + every registered Claude Code project) for the entries most relevant to the query.
 
 **Query:** $ARGUMENTS
 
-## Procedura
+## Procedure
 
-Esegui via Bash il seguente Python one-shot (gestisce parsing robusto dell'output di basic-memory, che a volte contiene control chars che spaccano jq):
+Run via Bash the following Python one-shot (handles robust parsing of basic-memory output, which sometimes contains control chars that break jq):
 
 ```bash
 python3 <<'PY'
@@ -46,28 +46,28 @@ for proj in projects:
         fails.append((proj, str(e)[:60]))
 
 all_hits.sort(key=lambda x: -x['score'])
-print(f"Hit totali: {len(all_hits)} su {len(projects)} project")
+print(f"Total hits: {len(all_hits)} across {len(projects)} projects")
 print()
 for i, h in enumerate(all_hits[:10], 1):
-    print(f"{i:2}. [{h['scope']}] {h['title']} — score {h['score']}")
+    print(f"{i:2}. [{h['scope']}] {h['title']} - score {h['score']}")
     print(f"     file: {h['file']}")
     print(f"     {h['excerpt']}")
 if fails:
-    print(f"\n!! {len(fails)} project failed: {fails}")
+    print(f"\n!! {len(fails)} projects failed: {fails}")
 PY
 ```
 
-Poi presenta i risultati all'utente in tabella Markdown:
+Then present the results to the user as a Markdown table:
 
-| Rank | Scope | Slug | Score | Estratto |
+| Rank | Scope | Slug | Score | Excerpt |
 |---|---|---|---|---|
 
-## Suggerisci azioni se opportuno
-- "Vuoi leggere il file completo? Posso aprirlo."
-- "Vuoi `/promote <slug>` se questo è universale ma è solo in un progetto?"
-- "Nessun match → vuoi `/remember-global <topic>` per scriverlo?"
+## Suggest follow-up actions when relevant
+- "Want me to open the full file?"
+- "Worth `/promote <slug>`? This rule is universal but lives only in one project."
+- "No match → want me to `/remember-global <topic>` to write it?"
 
-## Vincoli
-- Massimo 10 hit nella tabella.
-- Score minimo 0.5.
-- Non interrogare il progetto `main` (default basic-memory non usato da persistmind).
+## Constraints
+- Maximum 10 hits in the table.
+- Minimum score 0.5.
+- Do not query the `main` project (basic-memory's default, not used by persistmind).

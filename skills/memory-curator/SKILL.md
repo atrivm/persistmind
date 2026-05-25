@@ -1,98 +1,98 @@
 ---
 name: memory-curator
-description: When the user wants to write a memory (any of /remember, /remember-global, or just dictates "ricorda che..."), reshape it into the typed-fragment format with frontmatter (name, description, type, tags) and Why/How-to-apply body. Also use when reviewing/editing existing memory files in ~/.claude/memory/ or ~/.claude/projects/*/memory/. Ensures memories follow the Memory Contract defined in ~/.claude/CLAUDE.md.
+description: When the user wants to write a memory (any of /remember, /remember-global, or just dictates "remember that..."), reshape it into the typed-fragment format with frontmatter (name, description, type, tags) and Why/How-to-apply body. Also use when reviewing/editing existing memory files in ~/.claude/memory/ or ~/.claude/projects/*/memory/. Ensures memories follow the Memory Contract defined in ~/.claude/CLAUDE.md.
 metadata:
   version: 1.0.0
 ---
 
-# Memory Curator — Scrittura memorie ben strutturate
+# Memory Curator — Writing well-structured memories
 
-Aiuti l'utente a trasformare un'osservazione in linguaggio libero in un frammento di memoria ben formato, conforme al Memory Contract.
+Help the user turn a free-form observation into a well-formed memory fragment, compliant with the Memory Contract.
 
-## Procedura
+## Procedure
 
-1. **Input.** Una frase o paragrafo che l'utente vuole ricordare.
+1. **Input.** A sentence or paragraph the user wants to remember.
 
-2. **Identifica il tipo** tra: `user`, `feedback`, `project`, `decision`, `pivot`, `reference`.
+2. **Identify the type** among: `user`, `feedback`, `project`, `decision`, `pivot`, `reference`.
 
-3. **Genera lo slug.**
-   - Kebab-case
-   - 2-5 parole significative
-   - Niente articoli/preposizioni superflue
-   - Univoco rispetto alle memorie esistenti (controlla con `basic-memory tool search-notes "<slug>"`)
+3. **Generate the slug.**
+   - kebab-case
+   - 2-5 meaningful words
+   - No filler articles/prepositions
+   - Unique vs. existing memories (check with `basic-memory tool search-notes "<slug>"`)
 
-4. **Scrivi la `description`.**
-   - Una riga, max 100 caratteri
-   - Specifica, non generica ("Mai bumpare version senza richiesta" sì; "Regola git" no)
+4. **Write the `description`.**
+   - One line, max 100 characters
+   - Specific, not generic ("Never bump version without request" yes; "Git rule" no)
    - Match the user's working language (defaults to English)
 
-5. **Scegli i tag.**
-   - 2-4 tag
-   - Categorie comuni: `git`, `ci-cd`, `releases`, `security`, `workflow`, `autonomy`, `debugging`, `ui`, `tooling`, `cost`, `flutter`, `react`, `python`
-   - Aggiungi `cross-project` se è una regola promovibile a globale
+5. **Pick the tags.**
+   - 2-4 tags
+   - Common categories: `git`, `ci-cd`, `releases`, `security`, `workflow`, `autonomy`, `debugging`, `ui`, `tooling`, `cost`, `flutter`, `react`, `python`
+   - Add `cross-project` if the rule is promotable to global
 
-6. **Genera il corpo secondo il tipo.**
+6. **Generate the body by type.**
 
    **feedback/project:**
    ```markdown
-   <La regola/fatto in 1-2 frasi>
+   <The rule/fact in 1-2 sentences>
 
-   **Why:** <Motivazione, idealmente con riferimento a un incidente o pattern emerso>
+   **Why:** <Rationale, ideally referencing an incident or pattern that emerged>
 
-   **How to apply:** <Quando e come applicare la regola operativamente>
+   **How to apply:** <When and how to apply the rule operationally>
    ```
 
    **decision:**
    ```markdown
-   **Cosa:** <Decisione presa>
-   **Perché:** <Motivazione, dati, vincoli>
-   **Alternative scartate:** <Quali e perché no>
-   **Reversibile?:** <Sì/No, con quale effort>
+   **What:** <Decision made>
+   **Why:** <Rationale, data, constraints>
+   **Discarded alternatives:** <Which ones and why not>
+   **Reversible?:** <Yes/No, with what effort>
    ```
 
    **pivot:**
    ```markdown
-   **Data:** <YYYY-MM-DD>
-   **Da:** <Stato precedente>
-   **A:** <Nuovo stato>
-   **Trigger:** <Cosa l'ha causato>
-   **Impatto:** <Cosa cambia da qui in poi>
+   **Date:** <YYYY-MM-DD>
+   **From:** <Previous state>
+   **To:** <New state>
+   **Trigger:** <What caused it>
+   **Impact:** <What changes going forward>
    ```
 
    **reference:**
    ```markdown
-   **Cosa è:** <Descrizione breve>
-   **Dove:** <URL/path/comando>
-   **Quando consultarlo:** <Casi d'uso>
+   **What it is:** <Short description>
+   **Where:** <URL/path/command>
+   **When to consult:** <Use cases>
    ```
 
-7. **Compose il file completo:**
+7. **Compose the full file:**
    ```yaml
    ---
    name: <slug>
-   description: <descrizione>
+   description: <description>
    metadata:
-     type: <tipo>
+     type: <type>
      created: <YYYY-MM-DD>
      tags: [<tag1>, <tag2>, ...]
    ---
 
-   <corpo>
+   <body>
    ```
 
-8. **Mostra all'utente** il frammento completo PRIMA di salvarlo. Chiedi conferma.
+8. **Show the fragment to the user** BEFORE saving. Ask for confirmation.
 
-9. **Salva.** Path:
-   - `~/.claude/memory/global/<type>_<slug>.md` per globale
-   - `~/.claude/projects/<slug-progetto>/memory/<type>_<slug>.md` per progetto
+9. **Save.** Path:
+   - `~/.claude/memory/global/<type>_<slug>.md` for global
+   - `~/.claude/projects/<project-slug>/memory/<type>_<slug>.md` for project
 
-10. **Aggiorna l'indice MEMORY.md** corrispondente.
+10. **Update the corresponding MEMORY.md index.**
 
 11. **Sync basic-memory** via `basic-memory sync 2>&1 | tail -5`.
 
-## Vincoli
+## Constraints
 
-- Mai inventare incidenti o motivazioni — chiedi all'utente se non specificate.
-- Mai salvare credenziali/token/dati sensibili.
-- Se il contenuto è ambiguo tra 2 tipi (es. decision vs project), chiedi all'utente.
-- Se esiste già una memoria con slug simile, proponi un edit invece di un nuovo file.
+- Never invent incidents or rationales — ask the user if not specified.
+- Never save credentials/tokens/sensitive data.
+- If the content is ambiguous between 2 types (e.g. decision vs project), ask the user.
+- If a memory with a similar slug already exists, propose an edit instead of a new file.

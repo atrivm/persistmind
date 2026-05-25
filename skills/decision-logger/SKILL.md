@@ -1,66 +1,66 @@
 ---
 name: decision-logger
-description: When the user makes an explicit architectural or technical decision during the session — phrases like "decidiamo di...", "andiamo con X", "scegliamo Y", "abbiamo scelto", "useremo", "non usiamo più", "scartiamo X", "andiamo avanti con", "preferiamo Y a X", or when Claude detects a clear choice being made between alternatives. After the decision is taken, this skill proposes to save it as a typed `decision` memory.
+description: When the user makes an explicit architectural or technical decision during the session — phrases like "let's go with X", "we'll use Y", "we picked Z", "we're choosing A over B", "we're dropping X", "moving forward with...", "preferring Y to X", or when Claude detects a clear choice being made between alternatives. After the decision is taken, this skill proposes to save it as a typed `decision` memory.
 metadata:
   version: 1.0.0
 ---
 
-# Decision Logger — Cattura decisioni architetturali
+# Decision Logger — Architectural decision capture
 
-Quando una decisione viene presa, proponi all'utente di salvarla in memoria con il contesto del perché.
+When a decision is made, propose to the user that you save it to memory along with the why.
 
-## Trigger pattern
+## Trigger patterns
 
-- "decidiamo di..."
-- "andiamo con X"
-- "scegliamo Y"
-- "abbiamo scelto"
-- "useremo..."
-- "non usiamo più X"
-- "scartiamo Y"
-- "preferiamo X a Y"
-- Una conversazione tipo "valutiamo A vs B" che si conclude con "OK, A".
+- "let's go with X"
+- "we'll use Y"
+- "we picked..."
+- "we're choosing..."
+- "we're dropping X"
+- "we prefer X to Y"
+- A conversation like "let's evaluate A vs B" that concludes with "OK, A".
 
-## Procedura
+Recognize the equivalent phrases in the user's working language.
 
-1. **Riconosci la decisione.** Anche implicita: se valutavate 2-3 opzioni e ora state procedendo con una, c'è una decisione da loggare.
+## Procedure
 
-2. **NON interrompere il flusso immediatamente.** Aspetta la fine del momento decisionale (il messaggio successivo, o quando si passa a un altro topic).
+1. **Recognize the decision.** Even implicit ones: if you were evaluating 2-3 options and are now proceeding with one, there's a decision to log.
 
-3. **Proponi il salvataggio:**
+2. **Do NOT interrupt the flow immediately.** Wait for the decision moment to settle (the next message, or when the topic shifts).
+
+3. **Propose the save:**
    ```
-   Vedo che abbiamo deciso: <X>.
-   Vuoi che la salvi come memoria di tipo `decision`? (suggerimento: scope progetto)
+   I see we've decided: <X>.
+   Want me to save it as a `decision` memory? (suggested scope: project)
    ```
 
-4. **Se l'utente conferma**, raccogli (idealmente da contesto, altrimenti chiedi):
-   - **Cosa:** la decisione
-   - **Perché:** motivazione (vincoli, dati, esperienza)
-   - **Alternative scartate:** quali altre opzioni erano sul tavolo e perché no
-   - **Reversibile?:** sì/no e con quale effort
+4. **If the user confirms**, collect (ideally from context, otherwise ask):
+   - **What:** the decision
+   - **Why:** rationale (constraints, data, experience)
+   - **Discarded alternatives:** which other options were on the table and why not
+   - **Reversible?:** yes/no and with what effort
 
-5. **Genera il fragment** via skill `memory-curator` (tipo: decision).
+5. **Generate the fragment** via the `memory-curator` skill (type: decision).
 
-6. **Salva** in `~/.claude/projects/<slug>/memory/decision_<slug>.md`.
+6. **Save** to `~/.claude/projects/<slug>/memory/decision_<slug>.md`.
 
-7. **Aggiorna l'indice MEMORY.md del progetto.**
+7. **Update the project's MEMORY.md index.**
 
-## Vincoli
+## Constraints
 
-- Mai forzare il salvataggio. Se l'utente dice "no", lascia perdere. Memoria volontaria.
-- Mai loggare decisioni non ancora confermate ("forse useremo X" non è una decisione).
-- Se l'utente conferma 3 decisioni di fila in 1 messaggio, raggruppa in un'unica proposta multi-select.
-- Mai salvare credenziali, password o configurazioni segrete come "decisione".
+- Never force the save. If the user says "no", drop it. Memory is opt-in.
+- Never log decisions that are not yet confirmed ("maybe we'll use X" is not a decision).
+- If the user confirms 3 decisions back-to-back in one message, group them into a single multi-select proposal.
+- Never save credentials, passwords, or secret configurations as "decisions".
 
-## Esempio
+## Example
 
-Conversazione:
-> Utente: dobbiamo scegliere tra Postgres e SQLite per la persistenza. Concurrent writes pesanti, ma single-machine.
-> Claude: [analisi pro/contro]
-> Utente: ok andiamo con Postgres, single-machine ma read replicas dopo.
+Conversation:
+> User: we need to pick between Postgres and SQLite for persistence. Heavy concurrent writes, but single-machine.
+> Claude: [pros/cons analysis]
+> User: ok let's go with Postgres, single-machine for now, read replicas later.
 
-Trigger! Proponi:
+Trigger! Propose:
 ```
-Decisione rilevata: usare Postgres (non SQLite) per la persistenza.
-Vuoi salvarla come `decision_postgres-over-sqlite`?
+Decision detected: use Postgres (not SQLite) for persistence.
+Save it as `decision_postgres-over-sqlite`?
 ```

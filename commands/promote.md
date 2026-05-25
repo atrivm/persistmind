@@ -1,48 +1,48 @@
 ---
-description: Promuovi una memoria da progetto a globale (User)
-argument-hint: "<nome-memoria-da-promuovere>"
+description: Promote a memory from project to global (User) scope
+argument-hint: "<memory-name-to-promote>"
 ---
 
-# /promote — Promozione memoria a globale
+# /promote — Promote memory to global
 
-Promuovi la memoria `$ARGUMENTS` dal progetto corrente allo strato globale User.
+Promote the memory `$ARGUMENTS` from the current project to the global User layer.
 
-## Procedura
+## Procedure
 
-1. **Identifica il progetto corrente.** `pwd` → slug.
+1. **Identify the current project.** `pwd` → slug.
 
-2. **Trova la memoria.** Cerca un file in `~/.claude/projects/<slug>/memory/` che matcha il nome dato:
-   - Match esatto sul filename (senza estensione)
-   - Match sul campo `name:` del frontmatter
-   - Match sullo slug nel filename
+2. **Find the memory.** Look for a file in `~/.claude/projects/<slug>/memory/` matching the given name:
+   - Exact match on the filename (without extension)
+   - Match on the `name:` field in frontmatter
+   - Match on the slug inside the filename
 
-   Se nessuno: messaggio "Memoria '$ARGUMENTS' non trovata nel progetto corrente. Memorie disponibili: <lista>".
+   If none: message "Memory '$ARGUMENTS' not found in the current project. Available memories: <list>".
 
-3. **Read del file.** Carica il contenuto e parse del frontmatter.
+3. **Read the file.** Load its content and parse the frontmatter.
 
-4. **Conferma con l'utente** mostrando:
-   - Origine: `<path-progetto>`
-   - Destinazione: `~/.claude/memory/global/<tipo>_<slug>.md`
-   - Anteprima del contenuto (3-5 righe).
+4. **Confirm with the user** by showing:
+   - Source: `<project-path>`
+   - Destination: `~/.claude/memory/global/<type>_<slug>.md`
+   - Content preview (3-5 lines).
 
-   Usa AskUserQuestion: "Promuovere a globale?" — opzioni: Sì sposta / Sì copia (lascia anche nel progetto) / No annulla.
+   Use AskUserQuestion: "Promote to global?" — options: Yes (move) / Yes (copy, keep in project too) / No (cancel).
 
-5. **Esegui la promozione:**
-   - **Sposta**: copia il file in `~/.claude/memory/global/<tipo>_<slug>.md`, rimuovi l'originale, aggiorna MEMORY.md di entrambi gli strati.
-   - **Copia**: copia il file in globale, lascia l'originale, aggiorna entrambi gli indici.
+5. **Execute the promotion:**
+   - **Move**: copy the file to `~/.claude/memory/global/<type>_<slug>.md`, delete the original, update MEMORY.md in both layers.
+   - **Copy**: copy the file into global, leave the original, update both indices.
 
-6. **Aggiorna frontmatter del file globale** se serve: `tags` può guadagnare `[global, promoted-from-<slug>]`.
+6. **Update the global file's frontmatter** if needed: `tags` may gain `[global, promoted-from-<slug>]`.
 
 7. **Sync** via `basic-memory sync 2>&1 | tail -5`.
 
-8. **Conferma** in una riga.
+8. **Confirm** in one line.
 
-## Quando usare
-- Una regola che applicavi al progetto X si rivela utile anche per Y e Z → promuovila.
-- Un pattern di lavoro emerso → diventa preferenza globale.
-- Un pointer a una risorsa esterna che vale per più progetti.
+## When to use
+- A rule you applied to project X turns out to be useful for Y and Z too → promote it.
+- A working pattern that emerged → becomes a global preference.
+- A pointer to an external resource that applies to multiple projects.
 
-## Quando NON usare
-- Decisioni di architettura specifiche di un progetto (es. "abbiamo scelto Postgres") — restano locali.
-- Fatti sul codice di un progetto.
-- Pivot storici di un progetto.
+## When NOT to use
+- Architecture decisions specific to one project (e.g. "we picked Postgres") — keep local.
+- Facts about a project's code.
+- Historical pivots of a project.

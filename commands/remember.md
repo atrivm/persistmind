@@ -1,52 +1,52 @@
 ---
-description: Salva un fatto/regola/decisione nel progetto corrente come frammento tipizzato
-argument-hint: "<contenuto da ricordare> [--type project|decision|pivot|reference|feedback]"
+description: Save a fact/rule/decision in the current project as a typed fragment
+argument-hint: "<content to remember> [--type project|decision|pivot|reference|feedback]"
 ---
 
-# /remember — Cattura memoria di progetto
+# /remember — Project memory capture
 
-Salva la seguente informazione come frammento di memoria nel progetto corrente.
+Save the following information as a memory fragment in the current project.
 
 **Input:** $ARGUMENTS
 
-## Procedura
+## Procedure
 
-1. **Identifica il progetto corrente.** Esegui `pwd` via Bash, prendi il percorso, slugificalo (es. `/home/dev/my-project` → `-home-dev-my-project`). Il path memoria di progetto è `~/.claude/projects/<slug>/memory/`.
+1. **Identify the current project.** Run `pwd` via Bash, take the path, and slugify it (e.g. `/home/dev/my-project` → `-home-dev-my-project`). The project memory path is `~/.claude/projects/<slug>/memory/`.
 
-2. **Determina il tipo.** Se l'utente non lo specifica, inferisci tra:
-   - `project` — fatto stabile sul progetto (architettura, stack, vincolo)
-   - `decision` — scelta consapevole (cosa, perché, alternative scartate)
-   - `pivot` — cambio di direzione (data, da X a Y, trigger, impatto)
-   - `reference` — pointer esterno (URL, path, comando ricorrente)
-   - `feedback` — regola di interazione per Claude
+2. **Determine the type.** If the user did not specify, infer between:
+   - `project` — stable fact about the project (architecture, stack, constraint)
+   - `decision` — deliberate choice (what, why, discarded alternatives)
+   - `pivot` — change of direction (date, from X to Y, trigger, impact)
+   - `reference` — external pointer (URL, path, recurring command)
+   - `feedback` — interaction rule for Claude
 
-3. **Genera frontmatter.** Slug kebab-case dal contenuto. Frontmatter:
+3. **Generate frontmatter.** kebab-case slug from the content. Frontmatter:
 ```yaml
 ---
 name: <kebab-slug>
-description: <una riga, specifica>
+description: <one line, specific>
 metadata:
-  type: <tipo>
-  created: <YYYY-MM-DD da `date '+%Y-%m-%d'`>
-  tags: [<2-4 tag rilevanti>]
+  type: <type>
+  created: <YYYY-MM-DD from `date '+%Y-%m-%d'`>
+  tags: [<2-4 relevant tags>]
 ---
 ```
 
-4. **Genera corpo** secondo il tipo:
-   - `feedback`/`project`: la regola/fatto, poi `**Why:**`, poi `**How to apply:**`.
-   - `decision`: cosa | perché | alternative scartate | reversibile?
-   - `pivot`: data | da X a Y | trigger | impatto.
-   - `reference`: cosa è | URL/path | quando consultarlo.
+4. **Generate the body** based on type:
+   - `feedback`/`project`: the rule/fact, then `**Why:**`, then `**How to apply:**`.
+   - `decision`: what | why | discarded alternatives | reversible?
+   - `pivot`: date | from X to Y | trigger | impact.
+   - `reference`: what it is | URL/path | when to consult it.
 
-5. **Scrivi il file** in `~/.claude/projects/<slug>/memory/<type>_<slug>.md` via Write tool. Crea la cartella se non esiste.
+5. **Write the file** to `~/.claude/projects/<slug>/memory/<type>_<slug>.md` via the Write tool. Create the directory if it does not exist.
 
-6. **Aggiorna l'indice** `~/.claude/projects/<slug>/memory/MEMORY.md`: aggiungi una riga nella sezione appropriata con `- [<slug>](<type>_<slug>.md) — <description>`.
+6. **Update the index** `~/.claude/projects/<slug>/memory/MEMORY.md`: add a line in the appropriate section with `- [<slug>](<type>_<slug>.md) — <description>`.
 
-7. **Sync semantico** (opzionale, se basic-memory ha un project che mappa questa cartella): notifica l'utente che è stato salvato e che la sincronizzazione avverrà al prossimo `basic-memory sync`.
+7. **Semantic sync** (optional, if basic-memory has a project mapping this folder): notify the user that the save is done and that indexing will happen at the next `basic-memory sync`.
 
-8. **Conferma all'utente** in una riga: "Memoria salvata: `<path>` (tipo: <type>, slug: <slug>)".
+8. **Confirm to the user** in one line: "Memory saved: `<path>` (type: <type>, slug: <slug>)".
 
-## Vincoli
-- NON sovrascrivere file esistenti senza chiedere conferma.
-- Se trovi una memoria simile (slug uguale o descrizione vicina), proponi all'utente di fare `edit` invece di una nuova.
-- Mai salvare credenziali, token, password (rifiuta esplicitamente).
+## Constraints
+- Do NOT overwrite existing files without confirmation.
+- If you find a similar memory (same slug or close description), suggest editing the existing one instead of creating a new one.
+- Never save credentials, tokens, passwords (refuse explicitly).

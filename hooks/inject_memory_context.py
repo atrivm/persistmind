@@ -123,16 +123,16 @@ def collect_semantic(prompt, project_slug, pinned):
 
 
 def print_output(pinned, semantic, project_slug):
-    lines = ['', '## Memorie auto-iniettate', '']
+    lines = ['', '## Auto-injected memories', '']
     for p in pinned:
-        lines.append(f"- [PIN/{p['scope']}] [{p['title']}]({p['file']}) — always-injected (leggi il file per dettagli)")
+        lines.append(f"- [PIN/{p['scope']}] [{p['title']}]({p['file']}) — always-injected (read the file for details)")
     for s in semantic:
         lines.append(f"- [{s['scope']}] [{s['title']}]({s['file']}) — {s['excerpt']}")
     lines.append('')
     src = f'basic-memory `{GLOBAL_PROJECT}`'
     if project_slug and project_slug != GLOBAL_PROJECT:
         src += f' + `{project_slug}`'
-    lines.append(f"_Source: {src}. PIN = sempre iniettate (`always_inject: true`)._")
+    lines.append(f"_Source: {src}. PIN = always-injected (`always_inject: true`)._")
     print('\n'.join(lines))
 
 

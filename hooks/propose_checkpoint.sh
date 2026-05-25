@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Stop hook — quando Claude termina una sessione (Stop event), propone /checkpoint via notifica desktop.
-# Non blocca, è informativo. Cross-platform: macOS (osascript), Linux (notify-send), fallback stderr.
+# Stop hook — when Claude ends a session (Stop event), it suggests /pm-checkpoint via desktop notification.
+# Non-blocking, purely informational.
 
 set -eu
 
-# Leggi input (lo ignoriamo, è solo un trigger)
+# Read input (ignored — this hook only reacts to the trigger).
 input=$(cat 2>/dev/null || true)
 
-TITLE="Claude Code — Memoria"
-MESSAGE="Vuoi salvare la memoria di questa sessione? Lancia /checkpoint prima di /clear."
+TITLE="Claude Code — Memory"
+MESSAGE="Want to save this session's memory? Run /pm-checkpoint before /clear."
 
+# Cross-platform notification with graceful fallbacks.
 notify() {
   case "$(uname -s)" in
     Darwin)
@@ -25,14 +26,15 @@ notify() {
       fi
       ;;
   esac
+  # Last-resort fallback: write to stderr (visible in the Claude Code console).
   echo "[${TITLE}] ${MESSAGE}" >&2
 }
 
 notify
 
-# Log nell'event log
+# Event log
 LOGDIR="${HOME}/.claude/logs"
 mkdir -p "$LOGDIR"
-echo "$(date -Iseconds) Stop event - checkpoint proposto" >> "$LOGDIR/checkpoint-reminders.log"
+echo "$(date -Iseconds) Stop event - checkpoint suggested" >> "$LOGDIR/checkpoint-reminders.log"
 
 exit 0

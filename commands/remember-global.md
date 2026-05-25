@@ -1,56 +1,56 @@
 ---
-description: Salva una regola/preferenza nello strato globale User (vale per tutti i progetti)
-argument-hint: "<contenuto da ricordare globalmente> [--type feedback|reference|user]"
+description: Save a rule/preference to the global User layer (applies to all projects)
+argument-hint: "<content to remember globally> [--type feedback|reference|user]"
 ---
 
-# /remember-global — Cattura memoria globale (User)
+# /remember-global — Global (User) memory capture
 
-Salva la seguente informazione come frammento di memoria GLOBALE — visibile in tutti i progetti.
+Save the following information as a GLOBAL memory fragment — visible across all projects.
 
 **Input:** $ARGUMENTS
 
-## Quando usare /remember-global vs /remember
-- Globale: regola di interazione universale, preferenza personale, pointer cross-progetto, identità.
-- Progetto: fatto/decisione/pivot specifico di un singolo progetto.
+## When to use /remember-global vs /remember
+- Global: universal interaction rule, personal preference, cross-project pointer, identity.
+- Project: fact/decision/pivot specific to a single project.
 
-In caso di dubbio: PROGETTO. Poi semmai usa `/promote` quando diventa chiaro che vale ovunque.
+If in doubt: PROJECT. You can always `/promote` later when it becomes clear it applies everywhere.
 
-## Procedura
+## Procedure
 
-1. **Determina il tipo.** Se non specificato:
-   - `feedback` — regola di interazione che Claude deve seguire
-   - `reference` — pointer cross-progetto (URL, path, comando)
-   - `user` — fatto sull'utente (chi è, cosa preferisce, cosa sa)
+1. **Determine the type.** If not specified:
+   - `feedback` — interaction rule Claude must follow
+   - `reference` — cross-project pointer (URL, path, command)
+   - `user` — fact about the user (who they are, what they prefer, what they know)
 
-2. **Genera frontmatter.** Slug kebab-case. Frontmatter:
+2. **Generate frontmatter.** kebab-case slug. Frontmatter:
 ```yaml
 ---
 name: <kebab-slug>
-description: <una riga, specifica>
+description: <one line, specific>
 metadata:
-  type: <tipo>
+  type: <type>
   created: <YYYY-MM-DD>
-  tags: [<2-4 tag>]
+  tags: [<2-4 tags>]
 ---
 ```
 
-3. **Genera corpo:**
-   - `feedback`: la regola, **Why:**, **How to apply:**.
-   - `reference`: cosa è, URL/path, quando consultarlo.
-   - `user`: il fatto, contesto, eventuali implicazioni per le risposte.
+3. **Generate the body:**
+   - `feedback`: the rule, **Why:**, **How to apply:**.
+   - `reference`: what it is, URL/path, when to consult it.
+   - `user`: the fact, context, any implications for responses.
 
-4. **Scrivi il file** in `~/.claude/memory/global/<type>_<slug>.md` via Write tool.
+4. **Write the file** to `~/.claude/memory/global/<type>_<slug>.md` via the Write tool.
 
-5. **Aggiorna l'indice** `~/.claude/MEMORY.md` — aggiungi una riga nella sezione appropriata:
-   - Identità → `## Identità`
-   - Feedback → `## Feedback (regole trasversali — derivate dai progetti)`
+5. **Update the index** `~/.claude/MEMORY.md` — add a line in the appropriate section:
+   - Identity → `## Identity`
+   - Feedback → `## Feedback (cross-project rules — distilled from projects)`
    - Reference → `## Reference`
 
-6. **Sync basic-memory.** Esegui via Bash: `basic-memory sync 2>&1 | tail -5` per indicizzare il nuovo file.
+6. **Sync basic-memory.** Run via Bash: `basic-memory sync 2>&1 | tail -5` to index the new file.
 
-7. **Conferma** in una riga: "Memoria GLOBALE salvata: `~/.claude/memory/global/<file>` (tipo: <type>)".
+7. **Confirm** in one line: "GLOBAL memory saved: `~/.claude/memory/global/<file>` (type: <type>)".
 
-## Vincoli
-- Non duplicare. Prima cerca con `basic-memory tool search-notes "<topic>"` se esiste già una memoria simile.
-- Le memorie globali sono SEMPRE visibili in contesto: scrivile breve e operativa, no prosa.
-- Mai salvare credenziali.
+## Constraints
+- Do not duplicate. First search with `basic-memory tool search-notes "<topic>"` to check if a similar memory exists.
+- Global memories are ALWAYS in context: keep them short and actionable, no prose.
+- Never save credentials.

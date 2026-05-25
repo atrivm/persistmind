@@ -1,80 +1,82 @@
 ---
 name: knowledge-recall
-description: When the user references past work or asks if something was previously discussed, decided, or built — phrases like "abbiamo già fatto X?", "avevamo deciso Y?", "ricordi quando...", "abbiamo provato...", "esisteva una soluzione per...", "non ricordo se...", "abbiamo visto questo errore prima?". Triggers semantic search across all memory layers (global + all projects) and presents matching results with relevance.
+description: When the user references past work or asks if something was previously discussed, decided, or built — phrases like "did we already do X?", "did we decide on Y?", "remember when...", "did we try...", "was there a solution for...", "I don't remember if...", "have we seen this error before?". Triggers semantic search across all memory layers (global + all projects) and presents matching results with relevance.
 metadata:
   version: 1.0.0
 ---
 
-# Knowledge Recall — Richiamo memoria cross-session
+# Knowledge Recall — Cross-session memory lookup
 
-Quando l'utente si chiede se qualcosa è già stato fatto/visto/deciso, fai una ricerca semantica e gli mostri quello che la memoria sa.
+When the user wonders if something has already been done/seen/decided, run a semantic search and surface what memory knows.
 
-## Trigger pattern (riconosci queste formulazioni)
+## Trigger patterns (recognize these formulations)
 
-- "abbiamo già fatto X?"
-- "ricordi quando...?"
-- "avevamo deciso..."
-- "abbiamo provato..."
-- "non ricordo se..."
-- "esisteva una soluzione..."
-- "abbiamo già visto questo errore?"
-- "in passato..."
-- "qualche sessione fa..."
+- "did we already do X?"
+- "remember when...?"
+- "we decided..."
+- "we tried..."
+- "I don't remember if..."
+- "was there a solution for..."
+- "have we seen this error before?"
+- "in the past..."
+- "a few sessions ago..."
 
-## Procedura
+Recognize the equivalent phrases in the user's working language.
 
-1. **Estrai la query.** Dalla frase utente, estrai 3-7 parole chiave significative (sostantivi, verbi specifici, identificatori tecnici). Scarta le formule conversazionali ("abbiamo", "ricordi", ecc.).
+## Procedure
 
-2. **Ricerca semantica primaria.** Via tool MCP basic-memory:
+1. **Extract the query.** From the user's sentence, pull 3-7 meaningful keywords (nouns, specific verbs, technical identifiers). Discard conversational filler ("did we", "remember", etc.).
+
+2. **Primary semantic search.** Via the basic-memory MCP tool:
    ```
    mcp__basic-memory__search_notes(query="<keywords>", limit=10)
    ```
-   Se non disponibile, fallback via Bash:
+   If unavailable, fall back via Bash:
    ```bash
    basic-memory tool search-notes "<keywords>" | head -100
    ```
 
-3. **Ricerca testuale parallela.** Per evitare falsi negativi, anche:
+3. **Parallel text search.** To avoid false negatives, also:
    ```bash
    grep -ril -E "<keyword1>|<keyword2>" ~/.claude/memory/ ~/.claude/projects/*/memory/ 2>/dev/null | head -10
    ```
 
-4. **Dedupe e ranking.** Combina i risultati, deduplicali per file_path. Ordina per score (semantic primary, then fallback recency).
+4. **Dedupe and rank.** Combine the results, dedupe by file_path. Sort by score (semantic primary, then fallback recency).
 
-5. **Filtro rilevanza.** Scarta entries con score < 0.4 (sotto questa soglia spesso è rumore).
+5. **Relevance filter.** Drop entries with score < 0.4 (below that threshold is usually noise).
 
-6. **Componi la risposta:**
+6. **Compose the answer:**
 
-   Se ≥1 match rilevanti:
+   If ≥1 relevant matches:
    ```markdown
-   **Sì, c'è memoria su questo:**
+   **Yes, there's memory on this:**
 
    1. **<title>** (<scope>, <type>, score <X.XX>)
-      <excerpt 2-3 righe>
+      <2-3 line excerpt>
 
    2. **<title>** (...)
       <excerpt>
 
    ...
 
-   Vuoi che apra il file completo di una di queste? O vuoi `/promote` se ne vedi una che dovrebbe valere globale?
+   Want me to open the full file of one of these? Or want to `/promote` one that should be global?
    ```
 
-   Se nessun match rilevante:
+   If no relevant match:
    ```markdown
-   **Nessun match in memoria per questo topic.**
+   **No memory match for this topic.**
 
-   Possibili motivi:
-   - Non l'abbiamo ancora salvato (vuoi /remember o /remember-global?)
-   - Lo abbiamo discusso ma non consolidato (era una conversazione effimera)
-   - Il pattern di ricerca era troppo specifico — provo con sinonimi: "<altre keyword>"
+   Possible reasons:
+   - We haven't saved it yet (want to `/remember` or `/remember-global`?)
+   - We discussed it but didn't consolidate (it was an ephemeral conversation)
+   - The search pattern was too specific — let me retry with synonyms: "<alt keywords>"
 
-   <riprova con sinonimi se sensato>
+   <retry with synonyms if it makes sense>
    ```
 
-## Vincoli
+## Constraints
 
-- Non inventare match. Se non c'è, dillo chiaramente.
-- Massimo 5 risultati nella prima passata. Se utente vuole di più, fa una seconda query mirata.
-- Sempre includere lo SCOPE (globale / nome progetto) per ogni hit — chiarisce dove vive la memoria.
-- Se trovi una memoria di progetto X mentre l'utente lavora su Y, segnalalo: "Questa memoria viene dal progetto X, potrebbe essere candidata a /promote globale."
+- Do not invent matches. If there's nothing, say so clearly.
+- Maximum 5 results in the first pass. If the user wants more, run a second targeted query.
+- Always include the SCOPE (global / project name) for each hit — it clarifies where the memory lives.
+- If you find a memory from project X while the user is working on Y, flag it: "This memory is from project X — possibly a candidate for `/promote` to global."

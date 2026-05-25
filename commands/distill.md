@@ -1,56 +1,56 @@
 ---
-description: Distilla la conversazione corrente in un elenco di fatti consolidati (senza salvare)
-argument-hint: "(opzionale) area di focus"
+description: Distill the current conversation into a list of consolidated facts (without saving)
+argument-hint: "(optional) focus area"
 ---
 
-# /distill — Distillazione conversazione
+# /distill — Conversation distillation
 
-Estrai dalla conversazione corrente solo i fatti consolidati, in forma sintetica e operativa. NON salvare nulla — produci solo un report leggibile.
+Extract from the current conversation only the consolidated facts, in a concise and actionable form. Do NOT save anything — produce a readable report only.
 
-**Focus opzionale:** $ARGUMENTS
+**Optional focus:** $ARGUMENTS
 
-## Procedura
+## Procedure
 
-1. **Scan della sessione.** Rileggi mentalmente la conversazione.
+1. **Scan the session.** Mentally re-read the conversation.
 
-2. **Estrai e categorizza:**
-   - **Decisioni** (cosa, perché, alternative)
-   - **Fatti** consolidati sul progetto (cose ora vere)
-   - **Pivot** (cambi di rotta)
-   - **Regole** emerse (cose che Claude dovrebbe ricordarsi di fare/non fare)
-   - **Reference** menzionati (URL, comandi, path)
+2. **Extract and categorize:**
+   - **Decisions** (what, why, alternatives)
+   - **Facts** consolidated about the project (things now true)
+   - **Pivots** (direction changes)
+   - **Rules** that emerged (things Claude should remember to do/not do)
+   - **References** mentioned (URLs, commands, paths)
 
-3. **Filtra il rumore.** Escludi:
-   - Tentativi falliti che non hanno prodotto apprendimenti utili.
-   - Frasi conversazionali generiche.
-   - Domande chiarificatrici esaurite.
+3. **Filter out noise.** Exclude:
+   - Failed attempts that produced no useful learning.
+   - Generic conversational phrases.
+   - Clarifying questions already resolved.
 
-4. **Presenta in formato strutturato:**
+4. **Present in structured format:**
 
 ```markdown
-# Distillazione sessione — <data>
+# Session distillation — <date>
 
-## Decisioni
+## Decisions
 - ...
 
-## Fatti consolidati
+## Consolidated facts
 - ...
 
-## Pivot
+## Pivots
 - ...
 
-## Regole emerse
+## Rules that emerged
 - ...
 
-## Reference
+## References
 - ...
 ```
 
-5. **Non salvare nulla.** Solo output.
+5. **Do not save anything.** Output only.
 
-6. **Suggerisci a fine output**: "Per salvare queste voci, usa `/checkpoint`. Per salvare singole voci, usa `/remember` o `/remember-global`."
+6. **Suggest at the end of output:** "To save these entries, use `/checkpoint`. For individual entries, use `/remember` or `/remember-global`."
 
-## Quando usare
-- Per fare il punto a metà sessione.
-- Prima di un meeting per portare un summary.
-- Quando vuoi vedere "cosa abbiamo concluso?" senza ancora committarti al salvataggio.
+## When to use
+- To take stock mid-session.
+- Before a meeting, to bring a summary.
+- When you want to see "what have we concluded?" without yet committing to a save.

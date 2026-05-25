@@ -1,67 +1,67 @@
 ---
 name: session-onboarding
-description: When a new Claude Code session starts and the user has not yet given a specific task, OR when the user says "che stavamo facendo?", "ricordami dove eravamo", "stato del progetto", "ultimo checkpoint", "brief". Provides a concise briefing of the current project state from memory — recent decisions, open pivots, applicable feedback rules, last checkpoint.
+description: When a new Claude Code session starts and the user has not yet given a specific task, OR when the user says "what were we doing?", "remind me where we left off", "project status", "last checkpoint", "brief". Provides a concise briefing of the current project state from memory — recent decisions, open pivots, applicable feedback rules, last checkpoint.
 metadata:
   version: 1.0.0
 ---
 
-# Session Onboarding — Brief di apertura sessione
+# Session Onboarding — Session-opening brief
 
-All'inizio di una sessione, o su richiesta, riepiloghi all'utente lo stato del progetto corrente da memoria, in modo da continuare da dove eravate.
+At the start of a session, or on request, summarize the current project state from memory so the user can resume from where they left off.
 
-## Procedura
+## Procedure
 
-1. **Identifica il progetto corrente.** `pwd` → slug.
+1. **Identify the current project.** `pwd` → slug.
 
-2. **Carica i tre strati di memoria:**
+2. **Load the three memory layers:**
 
-   - **Globale (User):** leggi `~/.claude/MEMORY.md` per l'elenco di regole trasversali attive.
+   - **Global (User):** read `~/.claude/MEMORY.md` for the list of active cross-project rules.
 
-   - **Progetto:** leggi `~/.claude/projects/<slug>/memory/MEMORY.md` (se esiste). Se manca, dillo all'utente.
+   - **Project:** read `~/.claude/projects/<slug>/memory/MEMORY.md` (if it exists). If missing, tell the user.
 
-   - **Recent activity:** esegui via Bash su DUE project (globale + corrente):
+   - **Recent activity:** run via Bash against TWO projects (global + current):
      ```bash
-     # globale
+     # global
      basic-memory tool recent-activity --page-size 5 --project "${PM_GLOBAL_PROJECT:-persistmind-global}"
-     # progetto corrente — derivare lo slug da cwd
-     # (es. /home/dev/my-project → "my-project" oppure schema "-home-dev-my-project")
+     # current project — derive the slug from cwd
+     # (e.g. /home/dev/my-project → "my-project" or encoded form "-home-dev-my-project")
      basic-memory tool recent-activity --page-size 5 --project <slug>
      ```
-     Per ottenere lo slug del progetto corrente leggi `~/.basic-memory/config.json` e trova l'entry il cui `path` corrisponde a `~/.claude/projects/<encoded-cwd>/memory`.
+     To get the current project's slug, read `~/.basic-memory/config.json` and find the entry whose `path` matches `~/.claude/projects/<encoded-cwd>/memory`.
 
-3. **Componi il brief in 3 sezioni:**
+3. **Compose the brief in 3 sections:**
 
    ```markdown
-   ## Brief di apertura — <progetto>
+   ## Opening brief — <project>
 
-   ### Stato corrente
-   <2-3 righe sintetiche derivate dai file `project_*.md` più recenti>
+   ### Current state
+   <2-3 lines distilled from the most recent `project_*.md` files>
 
-   ### Decisioni recenti
-   <Top 3-5 `decision_*.md` o `pivot_*.md` ordinati per `created` desc>
+   ### Recent decisions
+   <Top 3-5 `decision_*.md` or `pivot_*.md` sorted by `created` desc>
 
-   ### Regole attive (filtrate per rilevanza al progetto)
-   <Top 3-5 `feedback_*.md` globali rilevanti — es. se è Flutter, mostra flutter; se è Python, mostra python-related>
+   ### Active rules (filtered for project relevance)
+   <Top 3-5 relevant global `feedback_*.md` — e.g. if it's Flutter, show flutter-related; if Python, show python-related>
 
-   ### Open issues / TODO (da memoria)
-   <Eventuali memorie tipo `project_*` o `decision_*` con stato "open" o "in progress">
+   ### Open issues / TODO (from memory)
+   <Any `project_*` or `decision_*` entries with status "open" or "in progress">
 
    ### Last checkpoint
-   <Data dell'ultimo `/checkpoint` (cerca in MEMORY.md di progetto o filesystem mtime)>
+   <Date of the last `/checkpoint` (look in the project's MEMORY.md or the filesystem mtime)>
    ```
 
-4. **Stampalo all'utente.** Massimo 30-40 righe totali. Brevità prima di completezza.
+4. **Print it to the user.** Maximum 30-40 lines total. Brevity over completeness.
 
-5. **Chiudi con una domanda aperta:** "Da dove vuoi ripartire?" o "Cosa vuoi fare oggi?".
+5. **Close with an open question:** "Where do you want to pick up?" or "What do you want to do today?"
 
-## Quando NON eseguire
+## When NOT to run
 
-- L'utente ha già un task specifico in mano. In quel caso vai diretto al task.
-- Sessioni `/loop` o automatizzate.
-- Quando il context window non è ancora "freddo" (l'utente sta riprendendo una sessione lunga).
+- The user already has a specific task in hand. In that case go straight to the task.
+- `/loop` or automated sessions.
+- When the context window is not yet "cold" (the user is resuming a long session).
 
-## Vincoli
+## Constraints
 
-- Mai inventare attività non documentate.
-- Se non c'è memoria di progetto, dichiaralo: "Nessuna memoria di progetto trovata. Vuoi che inizializzi?".
-- Niente filler ("Sono lieto di aiutarti..."). Brief asciutto e operativo.
+- Never invent activity that is not documented.
+- If there is no project memory, declare it: "No project memory found. Want me to initialize?"
+- No filler ("Happy to help..."). Dry, operational brief.

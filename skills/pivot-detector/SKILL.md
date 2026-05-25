@@ -1,82 +1,84 @@
 ---
 name: pivot-detector
-description: When during a session the conversation reveals a change of direction — abandoning a previously chosen approach, switching technologies, restructuring architecture, or reversing a recent decision. Phrases like "cambiamo strada", "non funziona, proviamo Y", "abbandoniamo X", "ripensandoci", "stop, cambiamo approccio", "riavvolgiamo", "torniamo indietro su", or detecting that a previously documented `decision` is being contradicted. Proposes to save a `pivot` memory.
+description: When during a session the conversation reveals a change of direction — abandoning a previously chosen approach, switching technologies, restructuring architecture, or reversing a recent decision. Phrases like "let's change direction", "this isn't working, let's try Y", "drop X", "on second thought", "stop, change approach", "let's rewind", "let's go back on", or detecting that a previously documented `decision` is being contradicted. Proposes to save a `pivot` memory.
 metadata:
   version: 1.0.0
 ---
 
-# Pivot Detector — Cattura cambi di rotta
+# Pivot Detector — Capture direction changes
 
-Quando il flusso cambia direzione rispetto a una precedente scelta, proponi di salvarlo come pivot in memoria.
+When the flow changes direction relative to a previous choice, propose saving it as a pivot in memory.
 
-## Trigger pattern
+## Trigger patterns
 
-- "cambiamo strada"
-- "non funziona, proviamo Y"
-- "abbandoniamo X"
-- "ripensandoci..."
-- "stop, cambiamo approccio"
-- "torniamo indietro su X"
-- "X non andava, andiamo con Y"
-- Detection: l'utente sta contraddicendo una precedente decisione (`decision_*.md`) di questo progetto.
+- "let's change direction"
+- "not working, let's try Y"
+- "drop X"
+- "on second thought..."
+- "stop, change approach"
+- "let's go back on X"
+- "X wasn't working, going with Y"
+- Detection: the user is contradicting a previous `decision_*.md` of this project.
 
-## Procedura
+Recognize the equivalent phrases in the user's working language.
 
-1. **Rileva il pivot.**
+## Procedure
 
-   Due modi:
-   - **Esplicito**: l'utente usa una delle frasi sopra.
-   - **Implicito**: confronta la conversazione con `decision_*.md` esistenti del progetto. Se rilevi una contraddizione (es. memoria dice "scegliamo React", conversazione dice "usiamo SvelteKit invece"), trigger.
+1. **Detect the pivot.**
 
-2. **NON interrompere brutalmente.** Aspetta che l'idea si consolidi (1-2 turni di conversazione successivi).
+   Two paths:
+   - **Explicit**: the user uses one of the phrases above.
+   - **Implicit**: compare the conversation against the project's existing `decision_*.md`. If you detect a contradiction (e.g. memory says "we picked React", conversation says "using SvelteKit instead"), trigger.
 
-3. **Proponi il salvataggio:**
+2. **Do NOT interrupt abruptly.** Wait for the idea to settle (1-2 follow-up turns).
+
+3. **Propose the save:**
 
    ```
-   Rilevato pivot: stiamo abbandonando <X> in favore di <Y>.
-   
-   Memoria precedente: `decision_<slug-vecchio>` (creata il <data>) — vuoi che la marchi come superseded?
-   Vuoi salvare il pivot come `pivot_<slug>`?
+   Pivot detected: we're moving away from <X> toward <Y>.
+
+   Previous memory: `decision_<old-slug>` (created on <date>) — want me to mark it as superseded?
+   Want to save the pivot as `pivot_<slug>`?
    ```
 
-4. **Se conferma**, raccogli:
-   - **Data:** oggi
-   - **Da:** <stato precedente, eventualmente con riferimento alla memoria superseded>
-   - **A:** <nuovo stato>
-   - **Trigger:** cosa l'ha causato (errore? scoperta? vincolo emerso?)
-   - **Impatto:** cosa cambia da qui
+4. **If confirmed**, collect:
+   - **Date:** today
+   - **From:** <previous state, optionally with a reference to the superseded memory>
+   - **To:** <new state>
+   - **Trigger:** what caused it (error? discovery? new constraint?)
+   - **Impact:** what changes from here
 
-5. **Crea il file** `~/.claude/projects/<slug>/memory/pivot_<slug>.md` con skill `memory-curator`.
+5. **Create the file** `~/.claude/projects/<slug>/memory/pivot_<slug>.md` via the `memory-curator` skill.
 
-6. **Aggiorna la memoria superseded.** Se esiste, aggiungi al frontmatter:
+6. **Update the superseded memory.** If it exists, add to its frontmatter:
    ```yaml
    metadata:
      ...
      superseded_by: pivot_<slug>
-     superseded_at: <data>
+     superseded_at: <date>
    ```
-   E aggiungi in cima al corpo un avviso: `> **SUPERSEDED** da [[pivot_<slug>]] il <data>.`
+   And prepend a notice at the top of the body: `> **SUPERSEDED** by [[pivot_<slug>]] on <date>.`
 
-7. **Aggiorna MEMORY.md del progetto.** Aggiungi una sezione `## Pivot` se non c'è.
+7. **Update the project's MEMORY.md.** Add a `## Pivots` section if it doesn't exist.
 
-## Vincoli
+## Constraints
 
-- Mai etichettare come pivot un cambio minore (es. rename di una variabile). Pivot = cambio di approccio/tecnologia/architettura.
-- Mai sovrascrivere la memoria precedente: deve restare consultabile per audit storico, ma marcata come superseded.
-- Se l'utente sta solo brainstorming alternative ma non ha ancora deciso, NON trigger. Aspetta una scelta consolidata.
+- Never label a minor change as a pivot (e.g. renaming a variable). Pivot = change of approach/technology/architecture.
+- Never overwrite the previous memory: it must remain consultable for historical audit, but marked as superseded.
+- If the user is only brainstorming alternatives but hasn't actually decided, do NOT trigger. Wait for a settled choice.
 
-## Esempio
+## Example
 
-Memoria esistente: `decision_use-langgraph` — "Useremo LangGraph come orchestrator multi-agent."
+Existing memory: `decision_use-langgraph` — "We'll use LangGraph as the multi-agent orchestrator."
 
-Conversazione:
-> Utente: il costo di LangGraph è esploso, 60€/run. Proviamo con skills custom Claude Code.
-> Claude: [analizza]
-> Utente: ok, abbandoniamo LangGraph, riscriviamo come skills.
+Conversation:
+> User: LangGraph cost has exploded, €60/run. Let's try custom Claude Code skills.
+> Claude: [analyzes]
+> User: ok, dropping LangGraph, rewriting as skills.
 
-Trigger! Proponi:
+Trigger! Propose:
 ```
-Rilevato pivot: abbandono LangGraph in favore di skills Claude Code.
-Memoria precedente `decision_use-langgraph` → la marco come superseded.
-Salvo come `pivot_langgraph-to-skills`?
+Pivot detected: dropping LangGraph in favor of Claude Code skills.
+Previous memory `decision_use-langgraph` → I'll mark it as superseded.
+Save as `pivot_langgraph-to-skills`?
 ```

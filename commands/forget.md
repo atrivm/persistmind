@@ -1,38 +1,38 @@
 ---
-description: Rimuovi una memoria (globale o di progetto) dopo conferma
-argument-hint: "<nome-memoria-da-rimuovere>"
+description: Remove a memory (global or project) after confirmation
+argument-hint: "<memory-name-to-remove>"
 ---
 
-# /forget — Rimozione memoria
+# /forget — Memory removal
 
-Rimuovi la memoria `$ARGUMENTS`.
+Remove the memory `$ARGUMENTS`.
 
-## Procedura
+## Procedure
 
-1. **Cerca la memoria** in tutti gli strati:
-   - `~/.claude/memory/global/` (globale)
-   - `~/.claude/projects/*/memory/` (tutti i progetti)
+1. **Search for the memory** across all layers:
+   - `~/.claude/memory/global/` (global)
+   - `~/.claude/projects/*/memory/` (all projects)
 
-   Match su filename (senza estensione) o sul campo `name:` del frontmatter.
+   Match on filename (without extension) or on the `name:` field in the frontmatter.
 
-2. **Se più di un match**, presenta lista all'utente con AskUserQuestion: quale rimuovere?
+2. **If more than one match**, present the list to the user via AskUserQuestion: which one to remove?
 
-3. **Se nessun match**, lista le memorie disponibili con nomi simili (fuzzy match) e proponi correzione.
+3. **If no match**, list available memories with similar names (fuzzy match) and propose a correction.
 
-4. **Conferma rimozione** mostrando:
-   - Path completo
-   - 3 righe di anteprima del contenuto
-   - "Sei sicuro? La rimozione è definitiva (ma il backup giornaliero `~/.claude/backups/` la conserva)."
+4. **Confirm removal** by showing:
+   - Full path
+   - 3-line content preview
+   - "Are you sure? Removal is permanent (but the daily backup in `~/.claude/backups/` keeps a copy)."
 
-5. **Esegui** se confermato:
-   - Backup prima: `cp <file> ~/.claude/backups/forgotten_<timestamp>_<slug>.md`
-   - Rimuovi il file: `rm <file>`
-   - Rimuovi la riga dall'indice MEMORY.md (globale o progetto).
-   - Rebuild basic-memory index: `basic-memory reindex 2>&1 | tail -5`
+5. **Execute** if confirmed:
+   - Backup first: `cp <file> ~/.claude/backups/forgotten_<timestamp>_<slug>.md`
+   - Remove the file: `rm <file>`
+   - Remove the line from the MEMORY.md index (global or project).
+   - Rebuild the basic-memory index: `basic-memory reindex 2>&1 | tail -5`
 
-6. **Conferma finale** in una riga: "Rimossa: `<path>` (backup in `<backup-path>`)".
+6. **Final confirmation** in one line: "Removed: `<path>` (backup at `<backup-path>`)".
 
-## Vincoli
-- MAI rimuovere senza conferma esplicita.
-- Sempre fare backup prima della rimozione.
-- Se la memoria è linkata da altre (`[[<slug>]]` nel contenuto di altre memorie), avvisa l'utente di possibili dangling reference.
+## Constraints
+- NEVER remove without explicit confirmation.
+- Always back up before removal.
+- If the memory is linked from others (`[[<slug>]]` inside other memories' content), warn the user about possible dangling references.
