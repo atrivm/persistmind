@@ -11,7 +11,7 @@ Salva la seguente informazione come frammento di memoria nel progetto corrente.
 
 ## Procedura
 
-1. **Identifica il progetto corrente.** Esegui `pwd` via Bash, prendi il percorso, slugificalo (es. `/Users/alessio/AI Projects/Tonee` → `-Users-alessio-AI-Projects-Tonee`). Il path memoria di progetto è `~/.claude/projects/<slug>/memory/`.
+1. **Identifica il progetto corrente.** Esegui `pwd` via Bash, prendi il percorso, slugificalo (es. `/home/dev/my-project` → `-home-dev-my-project`). Il path memoria di progetto è `~/.claude/projects/<slug>/memory/`.
 
 2. **Determina il tipo.** Se l'utente non lo specifica, inferisci tra:
    - `project` — fatto stabile sul progetto (architettura, stack, vincolo)

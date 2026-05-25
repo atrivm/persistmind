@@ -22,9 +22,9 @@ All'inizio di una sessione, o su richiesta, riepiloghi all'utente lo stato del p
    - **Recent activity:** esegui via Bash su DUE project (globale + corrente):
      ```bash
      # globale
-     basic-memory tool recent-activity --page-size 5 --project claude-brain
+     basic-memory tool recent-activity --page-size 5 --project "${PM_GLOBAL_PROJECT:-persistmind-global}"
      # progetto corrente — derivare lo slug da cwd
-     # (es. /Users/alessio/AI Projects/persistent_memory → "persistent-memory" oppure schema "users-alessio-...")
+     # (es. /home/dev/my-project → "my-project" oppure schema "-home-dev-my-project")
      basic-memory tool recent-activity --page-size 5 --project <slug>
      ```
      Per ottenere lo slug del progetto corrente leggi `~/.basic-memory/config.json` e trova l'entry il cui `path` corrisponde a `~/.claude/projects/<encoded-cwd>/memory`.

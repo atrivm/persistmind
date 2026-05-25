@@ -3,7 +3,7 @@
 
 Reads {prompt, cwd, ...} JSON on stdin, prints to stdout:
   1) PINNED memories (frontmatter `always_inject: true`) — always shown
-  2) SEMANTIC top-3 from claude-brain + the current cwd's project
+  2) SEMANTIC top-3 from the global project + the current cwd's project
 """
 import json
 import os
@@ -12,8 +12,9 @@ import sys
 import subprocess
 import glob
 
-BM = '/Users/alessio/.local/bin/basic-memory'
+BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
 BM_CONFIG = os.path.expanduser('~/.basic-memory/config.json')
+GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
 
 
 def main():
@@ -81,7 +82,7 @@ def collect_pinned(cfg):
             seen.add(key)
             m = re.search(r'^name:\s*(.+)$', head, re.MULTILINE)
             title = m.group(1).strip() if m else os.path.basename(md).removesuffix('.md')
-            scope = 'global' if name == 'claude-brain' else name
+            scope = 'global' if name == GLOBAL_PROJECT else name
             pinned.append({'scope': scope, 'title': title, 'file': rel})
     return pinned
 
@@ -99,13 +100,13 @@ def query_project(proj, prompt):
 
 def collect_semantic(prompt, project_slug, pinned):
     semantic = []
-    targets = ['claude-brain']
-    if project_slug and project_slug != 'claude-brain':
+    targets = [GLOBAL_PROJECT]
+    if project_slug and project_slug != GLOBAL_PROJECT:
         targets.append(project_slug)
     for proj in targets:
         for r in query_project(proj, prompt):
             if r.get('score', 0) > 0.5:
-                scope = 'global' if proj == 'claude-brain' else proj
+                scope = 'global' if proj == GLOBAL_PROJECT else proj
                 semantic.append({
                     'scope': scope,
                     'title': r.get('title', ''),
@@ -128,8 +129,8 @@ def print_output(pinned, semantic, project_slug):
     for s in semantic:
         lines.append(f"- [{s['scope']}] [{s['title']}]({s['file']}) — {s['excerpt']}")
     lines.append('')
-    src = 'basic-memory `claude-brain`'
-    if project_slug and project_slug != 'claude-brain':
+    src = f'basic-memory `{GLOBAL_PROJECT}`'
+    if project_slug and project_slug != GLOBAL_PROJECT:
         src += f' + `{project_slug}`'
     lines.append(f"_Source: {src}. PIN = sempre iniettate (`always_inject: true`)._")
     print('\n'.join(lines))

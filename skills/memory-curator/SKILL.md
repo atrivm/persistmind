@@ -24,7 +24,7 @@ Aiuti l'utente a trasformare un'osservazione in linguaggio libero in un framment
 4. **Scrivi la `description`.**
    - Una riga, max 100 caratteri
    - Specifica, non generica ("Mai bumpare version senza richiesta" sì; "Regola git" no)
-   - In Italiano se l'utente lavora in italiano
+   - Match the user's working language (defaults to English)
 
 5. **Scegli i tag.**
    - 2-4 tag

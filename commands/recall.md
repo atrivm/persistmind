@@ -18,6 +18,7 @@ python3 <<'PY'
 import json, os, subprocess
 
 QUERY = """$ARGUMENTS"""
+GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
 
 with open(os.path.expanduser('~/.basic-memory/config.json')) as f:
     cfg = json.load(f)
@@ -35,7 +36,7 @@ for proj in projects:
         for r in data.get('results', []):
             if r.get('score', 0) > 0.5:
                 all_hits.append({
-                    'scope': 'global' if proj == 'claude-brain' else proj,
+                    'scope': 'global' if proj == GLOBAL_PROJECT else proj,
                     'title': r.get('title', ''),
                     'file': r.get('file_path', ''),
                     'score': round(r.get('score', 0), 2),
@@ -69,4 +70,4 @@ Poi presenta i risultati all'utente in tabella Markdown:
 ## Vincoli
 - Massimo 10 hit nella tabella.
 - Score minimo 0.5.
-- Non interrogare il progetto `main` (default basic-memory non usato per il Cervello Persistente).
+- Non interrogare il progetto `main` (default basic-memory non usato da persistmind).
