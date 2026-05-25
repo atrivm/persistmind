@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Logs / temp
+*.log
+*.tmp
+*.bak
+*.orig
+
+# Local test/dogfooding artifacts (we MUST NOT install into ~/.claude during dev)
+.local-install/
+.sandbox/
