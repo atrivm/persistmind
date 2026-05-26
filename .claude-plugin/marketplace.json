@@ -1,11 +1,11 @@
 {
-  "name": "alessiosag",
+  "name": "atrivm",
   "owner": {
     "name": "Alessio Saggiomo"
   },
   "metadata": {
     "description": "Claude Code plugins by Alessio Saggiomo",
-    "homepage": "https://github.com/alessiosag"
+    "homepage": "https://github.com/atrivm"
   },
   "plugins": [
     {
