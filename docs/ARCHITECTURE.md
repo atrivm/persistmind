@@ -135,6 +135,7 @@ Five deterministic hooks bound to Claude Code lifecycle events.
 | Hook | Event | Purpose |
 |---|---|---|
 | `inject_memory_context.sh` → `.py` | `UserPromptSubmit` | Injects pinned memories (`always_inject: true`) + top semantic hits as context |
+| `capture_observation.sh` → `.py` | `SessionEnd` | Writes one deterministic note per session into the observation buffer (Layer 3) |
 | `propose_checkpoint.sh` | `Stop` | Cross-platform notification suggesting `/pm-checkpoint` before `/clear` |
 | `block_dangerous_git.sh` | `PreToolUse` (Bash) | Blocks `--no-verify`, force-push on main, `--no-gpg-sign`, `Co-Authored-By` |
 | `block_version_bump.sh` | `PreToolUse` (Edit/Write) | Blocks unintended version bumps in package manifests |
