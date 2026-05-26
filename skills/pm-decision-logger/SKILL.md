@@ -1,5 +1,5 @@
 ---
-name: decision-logger
+name: pm-decision-logger
 description: When the user makes an explicit architectural or technical decision during the session — phrases like "let's go with X", "we'll use Y", "we picked Z", "we're choosing A over B", "we're dropping X", "moving forward with...", "preferring Y to X", or when Claude detects a clear choice being made between alternatives. After the decision is taken, this skill proposes to save it as a typed `decision` memory.
 metadata:
   version: 1.0.0
@@ -39,7 +39,7 @@ Recognize the equivalent phrases in the user's working language.
    - **Discarded alternatives:** which other options were on the table and why not
    - **Reversible?:** yes/no and with what effort
 
-5. **Generate the fragment** via the `memory-curator` skill (type: decision).
+5. **Generate the fragment** via the `pm-memory-curator` skill (type: decision).
 
 6. **Save** to `~/.claude/projects/<slug>/memory/decision_<slug>.md`.
 

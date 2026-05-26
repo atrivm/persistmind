@@ -22,18 +22,18 @@ Promote the memory `$ARGUMENTS` from the current project to the global User laye
 
 4. **Confirm with the user** by showing:
    - Source: `<project-path>`
-   - Destination: `~/.claude/memory/global/<type>_<slug>.md`
+   - Destination: `~/.claude/memory/persistmind/<type>_<slug>.md`
    - Content preview (3-5 lines).
 
    Use AskUserQuestion: "Promote to global?" — options: Yes (move) / Yes (copy, keep in project too) / No (cancel).
 
 5. **Execute the promotion:**
-   - **Move**: copy the file to `~/.claude/memory/global/<type>_<slug>.md`, delete the original, update MEMORY.md in both layers.
+   - **Move**: copy the file to `~/.claude/memory/persistmind/<type>_<slug>.md`, delete the original, update MEMORY.md in both layers.
    - **Copy**: copy the file into global, leave the original, update both indices.
 
 6. **Update the global file's frontmatter** if needed: `tags` may gain `[global, promoted-from-<slug>]`.
 
-7. **Sync** via `basic-memory sync 2>&1 | tail -5`.
+7. **Verify sync** via `basic-memory status 2>&1 | tail -5`.
 
 8. **Confirm** in one line.
 

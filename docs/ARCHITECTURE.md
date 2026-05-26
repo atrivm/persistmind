@@ -112,12 +112,12 @@ Six observer skills. They **read** the conversation and **propose** captures, bu
 
 | Skill | Triggers on |
 |---|---|
-| `memory-curator` | Any save intent — reshapes free-form input into typed fragment |
-| `session-onboarding` | Session start with no specific task — produces brief from memory |
-| `knowledge-recall` | "Did we already…?" / "Remember when…?" — semantic search |
-| `decision-logger` | Detected architectural choice — proposes a `decision` memory |
-| `pivot-detector` | Direction change contradicting a prior decision — proposes a `pivot` |
-| `memory-audit` | "Clean up memory" / "any contradictions?" — stale/dup/conflict checks |
+| `pm-memory-curator` | Any save intent — reshapes free-form input into typed fragment |
+| `pm-session-onboarding` | Session start with no specific task — produces brief from memory |
+| `pm-knowledge-recall` | "Did we already…?" / "Remember when…?" — semantic search |
+| `pm-decision-logger` | Detected architectural choice — proposes a `decision` memory |
+| `pm-pivot-detector` | Direction change contradicting a prior decision — proposes a `pivot` |
+| `pm-memory-audit` | "Clean up memory" / "any contradictions?" — stale/dup/conflict checks |
 
 ### Hooks (`hooks/`)
 
@@ -139,7 +139,7 @@ Ten universal `feedback`-type rule templates installed by `/pm-init` if the user
 ## Capture flow
 
 ```
-User intent → slash command → memory-curator skill → typed fragment → MEMORY.md index updated → basic-memory sync
+User intent → slash command → pm-memory-curator skill → typed fragment → MEMORY.md index updated → basic-memory auto-sync
 ```
 
 Three invariants:

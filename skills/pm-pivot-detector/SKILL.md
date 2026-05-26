@@ -1,5 +1,5 @@
 ---
-name: pivot-detector
+name: pm-pivot-detector
 description: When during a session the conversation reveals a change of direction — abandoning a previously chosen approach, switching technologies, restructuring architecture, or reversing a recent decision. Phrases like "let's change direction", "this isn't working, let's try Y", "drop X", "on second thought", "stop, change approach", "let's rewind", "let's go back on", or detecting that a previously documented `decision` is being contradicted. Proposes to save a `pivot` memory.
 metadata:
   version: 1.0.0
@@ -48,7 +48,7 @@ Recognize the equivalent phrases in the user's working language.
    - **Trigger:** what caused it (error? discovery? new constraint?)
    - **Impact:** what changes from here
 
-5. **Create the file** `~/.claude/projects/<slug>/memory/pivot_<slug>.md` via the `memory-curator` skill.
+5. **Create the file** `~/.claude/projects/<slug>/memory/pivot_<slug>.md` via the `pm-memory-curator` skill.
 
 6. **Update the superseded memory.** If it exists, add to its frontmatter:
    ```yaml

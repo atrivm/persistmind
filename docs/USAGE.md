@@ -49,7 +49,7 @@ The wizard writes:
 /pm-remember "migrations must be reversible — we got burned in Q3 when the user-table rename couldn't be rolled back"
 ```
 
-`/pm-remember` saves to the **current project** layer. The `memory-curator` skill takes your free-form input, identifies the type (here: `feedback`), generates a slug, drafts a `**Why:**` and `**How to apply:**` section, and shows you the result before writing.
+`/pm-remember` saves to the **current project** layer. The `pm-memory-curator` skill takes your free-form input, identifies the type (here: `feedback`), generates a slug, drafts a `**Why:**` and `**How to apply:**` section, and shows you the result before writing.
 
 For rules that apply across every project:
 
@@ -61,9 +61,9 @@ For rules that apply across every project:
 
 You don't always need to type a command. Three observer skills watch the conversation and propose captures when relevant:
 
-- **`decision-logger`** — when you say "let's go with X", "we'll use Y", "we picked Z over W", it proposes a `decision` memory with what / why / alternatives / reversible.
-- **`pivot-detector`** — when the conversation contradicts a saved decision ("actually let's drop the queue and use webhooks instead"), it proposes a `pivot` memory and marks the old decision as superseded.
-- **`memory-curator`** — when you say "remember that…" without using a slash command, it routes through the same drafting pipeline.
+- **`pm-decision-logger`** — when you say "let's go with X", "we'll use Y", "we picked Z over W", it proposes a `decision` memory with what / why / alternatives / reversible.
+- **`pm-pivot-detector`** — when the conversation contradicts a saved decision ("actually let's drop the queue and use webhooks instead"), it proposes a `pivot` memory and marks the old decision as superseded.
+- **`pm-memory-curator`** — when you say "remember that…" without using a slash command, it routes through the same drafting pipeline.
 
 Every proposal is shown for confirmation. Nothing is saved silently.
 
@@ -100,7 +100,7 @@ When you want to search yourself:
 
 This runs across **every** registered basic-memory project (not just global + current), so you can find work from another codebase. Top 10 hits ranked by score, each with scope, excerpt, and a link to the full fragment.
 
-The `knowledge-recall` skill triggers on the same intent expressed in natural language ("did we already solve this?", "remember when we tried X?") — it runs the same search and presents results conversationally.
+The `pm-knowledge-recall` skill triggers on the same intent expressed in natural language ("did we already solve this?", "remember when we tried X?") — it runs the same search and presents results conversationally.
 
 ## Maintenance
 
@@ -136,7 +136,7 @@ Searches both layers, backs the file up to `~/.claude/backups/`, removes it and 
 clean up memory
 ```
 
-(Or `audit memories`, `any contradictions?`, etc. — the `memory-audit` skill triggers on these phrases.)
+(Or `audit memories`, `any contradictions?`, etc. — the `pm-memory-audit` skill triggers on these phrases.)
 
 The skill runs structural checks:
 
@@ -153,7 +153,7 @@ Each Claude Code project gets its own memory directory under `~/.claude/projects
 
 basic-memory tracks each project as a separate indexed collection. Cross-project search (`/pm-recall`) walks them all. The global layer is itself a basic-memory project (default name `persistmind-global`, override via `PM_GLOBAL_PROJECT`).
 
-When starting a fresh session inside an existing project, the `session-onboarding` skill produces a brief from memory: current state, recent decisions, applicable global rules, open TODOs, last checkpoint date. Triggered by an empty-handed session start or by phrases like "where did we leave off?".
+When starting a fresh session inside an existing project, the `pm-session-onboarding` skill produces a brief from memory: current state, recent decisions, applicable global rules, open TODOs, last checkpoint date. Triggered by an empty-handed session start or by phrases like "where did we leave off?".
 
 ## Safety hooks
 
@@ -172,7 +172,7 @@ Both are PreToolUse hooks — they fail loud with a message explaining what was 
 
 **`/pm-init` keeps duplicating the CLAUDE.md block.** It shouldn't — the block is delimited and replaced in place. If it does, file a bug with the contents of your `~/.claude/CLAUDE.md`.
 
-**Memory feels stale.** Run the `memory-audit` skill ("clean up memory") and prune.
+**Memory feels stale.** Run the `pm-memory-audit` skill ("clean up memory") and prune.
 
 ## Next steps
 

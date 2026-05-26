@@ -91,12 +91,12 @@ For the full workflow guide, see [docs/USAGE.md](./docs/USAGE.md).
 
 Six skills watch the conversation and propose captures when relevant — nothing is saved without your confirmation:
 
-- **`memory-curator`** — drafts free-form input into typed fragments
-- **`session-onboarding`** — produces a brief from memory at session start
-- **`knowledge-recall`** — answers "did we already…?" with semantic search
-- **`decision-logger`** — proposes `decision` memories when you settle a choice
-- **`pivot-detector`** — proposes `pivot` memories when direction changes
-- **`memory-audit`** — checks for stale entries, duplicates, orphans, conflicts
+- **`pm-memory-curator`** — drafts free-form input into typed fragments
+- **`pm-session-onboarding`** — produces a brief from memory at session start
+- **`pm-knowledge-recall`** — answers "did we already…?" with semantic search
+- **`pm-decision-logger`** — proposes `decision` memories when you settle a choice
+- **`pm-pivot-detector`** — proposes `pivot` memories when direction changes
+- **`pm-memory-audit`** — checks for stale entries, duplicates, orphans, conflicts
 
 ## Safety hooks
 

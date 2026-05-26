@@ -39,16 +39,16 @@ metadata:
    - `reference`: what it is, URL/path, when to consult it.
    - `user`: the fact, context, any implications for responses.
 
-4. **Write the file** to `~/.claude/memory/global/<type>_<slug>.md` via the Write tool.
+4. **Write the file** to `~/.claude/memory/persistmind/<type>_<slug>.md` via the Write tool.
 
-5. **Update the index** `~/.claude/MEMORY.md` — add a line in the appropriate section:
+5. **Update the index** `~/.claude/memory/persistmind/MEMORY.md` — add a line in the appropriate section:
    - Identity → `## Identity`
    - Feedback → `## Feedback (cross-project rules — distilled from projects)`
    - Reference → `## Reference`
 
-6. **Sync basic-memory.** Run via Bash: `basic-memory sync 2>&1 | tail -5` to index the new file.
+6. **Verify basic-memory pickup.** Run via Bash: `basic-memory status 2>&1 | tail -5` to confirm the new file is picked up by the auto-indexer.
 
-7. **Confirm** in one line: "GLOBAL memory saved: `~/.claude/memory/global/<file>` (type: <type>)".
+7. **Confirm** in one line: "GLOBAL memory saved: `~/.claude/memory/persistmind/<file>` (type: <type>)".
 
 ## Constraints
 - Do not duplicate. First search with `basic-memory tool search-notes "<topic>"` to check if a similar memory exists.

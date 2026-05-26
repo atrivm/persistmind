@@ -1,5 +1,5 @@
 ---
-name: knowledge-recall
+name: pm-knowledge-recall
 description: When the user references past work or asks if something was previously discussed, decided, or built — phrases like "did we already do X?", "did we decide on Y?", "remember when...", "did we try...", "was there a solution for...", "I don't remember if...", "have we seen this error before?". Triggers semantic search across all memory layers (global + all projects) and presents matching results with relevance.
 metadata:
   version: 1.0.0

@@ -1,5 +1,5 @@
 ---
-name: session-onboarding
+name: pm-session-onboarding
 description: When a new Claude Code session starts and the user has not yet given a specific task, OR when the user says "what were we doing?", "remind me where we left off", "project status", "last checkpoint", "brief". Provides a concise briefing of the current project state from memory — recent decisions, open pivots, applicable feedback rules, last checkpoint.
 metadata:
   version: 1.0.0
@@ -15,7 +15,7 @@ At the start of a session, or on request, summarize the current project state fr
 
 2. **Load the three memory layers:**
 
-   - **Global (User):** read `~/.claude/MEMORY.md` for the list of active cross-project rules.
+   - **Global (User):** read `~/.claude/memory/persistmind/MEMORY.md` for the list of active cross-project rules.
 
    - **Project:** read `~/.claude/projects/<slug>/memory/MEMORY.md` (if it exists). If missing, tell the user.
 

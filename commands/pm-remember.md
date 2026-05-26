@@ -42,7 +42,7 @@ metadata:
 
 6. **Update the index** `~/.claude/projects/<slug>/memory/MEMORY.md`: add a line in the appropriate section with `- [<slug>](<type>_<slug>.md) — <description>`.
 
-7. **Semantic sync** (optional, if basic-memory has a project mapping this folder): notify the user that the save is done and that indexing will happen at the next `basic-memory sync`.
+7. **Semantic sync** (optional, if basic-memory has a project mapping this folder): notify the user that the save is done; basic-memory auto-indexes via its background watcher. Check with `basic-memory status 2>&1 | tail -5`.
 
 8. **Confirm to the user** in one line: "Memory saved: `<path>` (type: <type>, slug: <slug>)".
 

@@ -1,5 +1,5 @@
 ---
-name: memory-curator
+name: pm-memory-curator
 description: When the user wants to write a memory (any of /pm-remember, /pm-remember-global, or just dictates "remember that..."), reshape it into the typed-fragment format with frontmatter (name, description, type, tags) and Why/How-to-apply body. Also use when reviewing/editing existing memory files in ~/.claude/memory/ or ~/.claude/projects/*/memory/. Ensures memories follow the Memory Contract defined in ~/.claude/CLAUDE.md.
 metadata:
   version: 1.0.0
@@ -83,12 +83,12 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
 8. **Show the fragment to the user** BEFORE saving. Ask for confirmation.
 
 9. **Save.** Path:
-   - `~/.claude/memory/global/<type>_<slug>.md` for global
+   - `~/.claude/memory/persistmind/<type>_<slug>.md` for global
    - `~/.claude/projects/<project-slug>/memory/<type>_<slug>.md` for project
 
 10. **Update the corresponding MEMORY.md index.**
 
-11. **Sync basic-memory** via `basic-memory sync 2>&1 | tail -5`.
+11. **Verify basic-memory pickup** via `basic-memory status 2>&1 | tail -5`.
 
 ## Constraints
 

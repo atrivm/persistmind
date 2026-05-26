@@ -10,7 +10,7 @@ Remove the memory `$ARGUMENTS`.
 ## Procedure
 
 1. **Search for the memory** across all layers:
-   - `~/.claude/memory/global/` (global)
+   - `~/.claude/memory/persistmind/` (global)
    - `~/.claude/projects/*/memory/` (all projects)
 
    Match on filename (without extension) or on the `name:` field in the frontmatter.
