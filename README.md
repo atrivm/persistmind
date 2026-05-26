@@ -2,7 +2,7 @@
 
 > Persistent memory framework for Claude Code. Your AI companion remembers who you are, what you decided, and why — across sessions, projects, and time.
 
-**Status:** v0.1.0 in development. Not yet released.
+**Status:** v0.1.0 — first public release.
 
 ## What it does
 
@@ -29,10 +29,11 @@ For the full model — storage layout, fragment format, manifest, capture/recall
 
 ## Install
 
-> Pre-release. Once published, installation will be one command:
+Add the marketplace, install the plugin, then run the setup wizard:
 
 ```bash
-/plugin install persistmind
+/plugin marketplace add atrivm/persistmind
+/plugin install persistmind@atrivm
 /pm-init
 ```
 
@@ -56,7 +57,7 @@ export PM_BASIC_MEMORY_BIN=/full/path/to/basic-memory
 
 ## Quick start
 
-After `/pm-init` walks you through identity, language, and default rules:
+After `/pm-init` walks you through language and default rules:
 
 ```
 # Capture a project-scoped fact
@@ -78,7 +79,7 @@ For the full workflow guide, see [docs/USAGE.md](./docs/USAGE.md).
 
 | Command | What it does |
 |---|---|
-| `/pm-init` | First-run wizard: identity, language, default rules |
+| `/pm-init` | First-run wizard: language and default rules |
 | `/pm-remember "..."` | Capture a fact in the current project |
 | `/pm-remember-global "..."` | Capture a rule globally (all projects) |
 | `/pm-checkpoint` | End-of-session: propose what to save before `/clear` |
@@ -128,4 +129,4 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Status
 
-Pre-1.0. Breaking changes possible until v0.1.0 ships.
+v0.1.0 is the first public release. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
