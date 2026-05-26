@@ -30,7 +30,6 @@ Backbone: [basic-memory](https://github.com/basicmachines-co/basic-memory) MCP s
 > Pre-release. Installation flow under construction. Will be available via the official Claude Code marketplace and direct GitHub install.
 
 ```bash
-# Placeholder — wizard not yet implemented
 /plugin install persistmind
 /pm-init
 ```
