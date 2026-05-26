@@ -1,66 +1,60 @@
 ---
-description: Initialize persistmind for the current user — identity, language, and feedback rules
+description: Initialize persistmind for the current user — language and feedback rules
 argument-hint: ""
 ---
 
 # /pm-init — Persistmind setup wizard
 
-Interactive setup that configures persistmind for the current user. Three steps + apply.
+Interactive setup that configures persistmind for the current user. Two steps + apply.
 
 The wizard:
-1. Asks identity (role, tech stack, optional display name).
-2. Asks language preferences.
-3. Lets the user pick which feedback rules to enable from the template catalog.
-4. Writes a managed block to `~/.claude/CLAUDE.md`, copies the chosen templates into `~/.claude/memory/persistmind/`, and seeds the index.
+1. Asks language preferences.
+2. Lets the user pick which feedback rules to enable from the template catalog.
+3. Writes a managed block to `~/.claude/CLAUDE.md`, copies the chosen templates into `~/.claude/memory/persistmind/`, and seeds the index.
 
 ## Procedure
 
 ### Step 0 — Pre-flight
 
-1. Resolve the plugin install path. Use the `${CLAUDE_PLUGIN_ROOT}` environment variable (exposed by Claude Code when running a plugin command). If the variable is not set, abort with:
-   `"Cannot resolve CLAUDE_PLUGIN_ROOT. Re-run /pm-init from inside a Claude Code session with the plugin installed."`
-
-2. Verify the template catalog exists:
+1. Resolve the plugin install path into an absolute path you will reuse for the rest of the wizard. `${CLAUDE_PLUGIN_ROOT}` is **not** reliably exported to Bash tool calls (known Claude Code limitation, issue #9354), so resolve it defensively:
    ```bash
-   ls "$CLAUDE_PLUGIN_ROOT/templates/rules/"*.md 2>/dev/null | head -1
+   PR="${CLAUDE_PLUGIN_ROOT:-}"
+   if [ -z "$PR" ] || [ ! -d "$PR/templates/rules" ]; then
+     PR=$(find ~/.claude/plugins -type d -path '*/persistmind/*/templates/rules' 2>/dev/null \
+          | sed 's#/templates/rules$##' | sort -V | tail -1)
+   fi
+   echo "PLUGIN_ROOT=$PR"
+   [ -n "$PR" ] && [ -d "$PR/templates/rules" ] && echo "catalog-ok" || echo "catalog-missing"
    ```
-   If empty, abort with:
-   `"Template catalog missing at $CLAUDE_PLUGIN_ROOT/templates/rules/. Reinstall the plugin."`
+   If the output is `catalog-missing`, abort with:
+   `"Cannot locate the persistmind plugin files. Reinstall the plugin and re-run /pm-init."`
 
-3. Detect prior state. Run via Bash:
+   Note the printed `PLUGIN_ROOT` absolute path and use it verbatim as the plugin root for every template `ls`/`Read` later in this wizard. Bash tool calls do not share shell state, so do not assume the `$PR` variable survives across separate calls — substitute the resolved path.
+
+2. Detect prior state. Run via Bash:
    ```bash
    test -d ~/.claude/memory/persistmind && echo "exists" || echo "new"
    ```
    If `exists`, tell the user the wizard will refresh the configuration (idempotent — see Constraints).
 
-4. Detect whether `~/.claude/CLAUDE.md` already contains a `<!-- PERSISTMIND START -->` ... `<!-- PERSISTMIND END -->` block:
+3. Detect whether `~/.claude/CLAUDE.md` already contains a `<!-- PERSISTMIND START -->` ... `<!-- PERSISTMIND END -->` block:
    ```bash
    grep -q '<!-- PERSISTMIND START -->' ~/.claude/CLAUDE.md 2>/dev/null && echo "block-exists" || echo "block-missing"
    ```
 
-### Step 1 — Identity
-
-Use `AskUserQuestion` to gather identity. Single question with three sub-questions where multi-select is appropriate.
-
-- "Primary role?" — options: `Backend engineer`, `Frontend engineer`, `Fullstack engineer`, `Mobile engineer`, `Data engineer / scientist`, `DevOps / SRE`, `Designer`. (single-select)
-- "Main tech stack?" — options: `TypeScript / JavaScript`, `Python`, `Go`, `Rust`, `Java / Kotlin`, `Swift`, `Flutter / Dart`, `React / Next.js`, `Vue / Nuxt`, `Svelte / SvelteKit`. (multi-select, 1-4 answers)
-- "Display name (optional)?" — present 1-2 plausible default options (e.g. shell `whoami`) plus `Other` for free-text. (single-select)
-
-Save the answers locally for Step 4. Skip silently if the user picks `Other` with empty input on the optional name.
-
-### Step 2 — Language
+### Step 1 — Language
 
 Use `AskUserQuestion`:
 
 - "Default language for Claude responses?" — options: `English`, `Italian`, `Spanish`, `French`, `German`, `Portuguese`. (single-select)
 
-Persistmind keeps code, identifiers and commit messages in English regardless of this choice — that constraint lives in the `code-in-english` rule (offered in Step 3).
+Persistmind keeps code, identifiers and commit messages in English regardless of this choice — that constraint lives in the `code-in-english` rule (offered in Step 2).
 
-### Step 3 — Rule selection
+### Step 2 — Rule selection
 
-1. List rule templates:
+1. List rule templates (`<plugin-root>` = the absolute path resolved in Step 0):
    ```bash
-   ls "$CLAUDE_PLUGIN_ROOT/templates/rules/"*.md
+   ls "<plugin-root>/templates/rules/"*.md
    ```
 
 2. For each file, Read it and extract the frontmatter `name` and `description`.
@@ -71,22 +65,22 @@ Persistmind keeps code, identifiers and commit messages in English regardless of
 
 4. Map the user's selection to slugs.
 
-### Step 4 — Apply
+### Step 3 — Apply
 
 Run these steps in order. Report progress in one line per phase.
 
-**4a. Create storage:**
+**3a. Create storage:**
 ```bash
 mkdir -p ~/.claude/memory/persistmind/
 ```
 
-**4b. Copy selected rule templates:**
+**3b. Copy selected rule templates:**
 For each picked slug:
-1. Read `$CLAUDE_PLUGIN_ROOT/templates/rules/<slug>.md`.
+1. Read `<plugin-root>/templates/rules/<slug>.md` (plugin root from Step 0).
 2. Write a copy to `~/.claude/memory/persistmind/feedback_<slug>.md`. Set the frontmatter `created` field to today's date (run `date '+%Y-%m-%d'` via Bash).
 3. If the destination file already exists, skip the copy and report `skipped: <slug> (already enabled)`.
 
-**4c. Seed the rule index `~/.claude/memory/persistmind/MEMORY.md`:**
+**3c. Seed the rule index `~/.claude/memory/persistmind/MEMORY.md`:**
 
 If the file does not exist, write this skeleton:
 ```markdown
@@ -102,7 +96,7 @@ Then append one line per activated rule (skip duplicates):
 - [<slug>](feedback_<slug>.md) — <description from frontmatter>
 ```
 
-**4d. Update `~/.claude/CLAUDE.md`:**
+**3d. Update `~/.claude/CLAUDE.md`:**
 
 Compose the managed block (English):
 
@@ -110,13 +104,8 @@ Compose the managed block (English):
 <!-- PERSISTMIND START -->
 # Persistmind
 
-## Identity
-- Role: <role from Step 1>
-- Stack: <comma-separated stack>
-- Name: <name if provided, otherwise omit this line>
-
 ## Language
-- Default response language: <language from Step 2>
+- Default response language: <language from Step 1>
 - Code, identifiers, commit messages: English
 
 ## Active feedback rules
@@ -134,14 +123,21 @@ Then:
 
 Never modify content outside the markers.
 
-**4e. Sync basic-memory** (best-effort):
+**3e. Register basic-memory project** (idempotent, best-effort):
 ```bash
-basic-memory sync 2>&1 | tail -5
+basic-memory project add "${PM_GLOBAL_PROJECT:-persistmind-global}" ~/.claude/memory/persistmind 2>&1 | head -5
+```
+Interpret the result and pick the project name to use for the status check in 3f:
+- Success, or output contains `already exists` → the global layer has its own indexed project. Use `${PM_GLOBAL_PROJECT:-persistmind-global}`.
+- Output contains `nested within existing project '<X>'` → another basic-memory project already covers this path. That is fine: the files are still indexed by `<X>`. Skip the dedicated project and use `<X>` for 3f. Report this as "covered by `<X>`", not as a failure.
+- `command not found` / not installed → warn, skip 3f, and continue (file-based memory still works; semantic search comes online when `basic-memory` is added later).
+
+**3f. Verify with basic-memory** (best-effort):
+```bash
+basic-memory status --project "<project resolved in 3e>" 2>&1 | tail -5
 ```
 
-If `basic-memory` is not installed, report a warning but do not abort — the file-based memory still works; semantic search comes online when `basic-memory` is added later.
-
-### Step 5 — Final report
+### Step 4 — Final report
 
 Print to the user:
 
@@ -150,7 +146,7 @@ Persistmind initialized.
   Storage:     ~/.claude/memory/persistmind/
   Rules:       N activated, M skipped
   CLAUDE.md:   block <added | updated>
-  Sync:        <ok | basic-memory not found>
+  Sync:        <ok (persistmind-global) | covered by <project> | basic-memory not found>
 
 Next steps:
   /pm-remember "<fact>"       — capture a project fact
@@ -162,6 +158,5 @@ Next steps:
 
 - **Idempotent.** Re-running the wizard replaces the PERSISTMIND block in `CLAUDE.md` in-place, never appends a duplicate, and never overwrites existing rule files unless the user explicitly opts in.
 - **No edits outside markers.** Touching `CLAUDE.md` outside `<!-- PERSISTMIND START -->` / `<!-- PERSISTMIND END -->` is forbidden — the user owns that space.
-- **No secrets in Identity.** If the user enters a credential/token in the optional name field, refuse and re-ask.
-- **English output.** The managed block in `CLAUDE.md` and the `MEMORY.md` skeleton are always in English. Only the chat responses follow the Step 2 language preference.
+- **English output.** The managed block in `CLAUDE.md` and the `MEMORY.md` skeleton are always in English. Only the chat responses follow the Step 1 language preference.
 - **Best-effort sync.** Missing `basic-memory` is not a fatal error — warn but proceed.
