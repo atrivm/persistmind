@@ -97,7 +97,7 @@ Eight user-facing commands. They are the **only** code paths authorized to write
 
 | Command | Role |
 |---|---|
-| `/pm-init` | First-run wizard: identity, language, default feedback rules |
+| `/pm-init` | First-run wizard: language and default feedback rules |
 | `/pm-remember` | Capture a fact in the current project |
 | `/pm-remember-global` | Capture a rule in the user global layer |
 | `/pm-checkpoint` | End-of-session: analyze conversation, propose what to save |

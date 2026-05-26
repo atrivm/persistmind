@@ -25,19 +25,19 @@ export PM_BASIC_MEMORY_BIN=/full/path/to/basic-memory
 Install the plugin, then bootstrap:
 
 ```bash
-/plugin install persistmind
+/plugin marketplace add atrivm/persistmind
+/plugin install persistmind@atrivm
 /pm-init
 ```
 
-`/pm-init` is a 3-step interactive wizard:
+`/pm-init` is a 2-step interactive wizard:
 
-1. **Identity** — who you are (role, primary tech stack, display name).
-2. **Language** — the language you want Claude to respond in. Code, identifiers, and commit messages stay English regardless; only the conversational layer follows your choice.
-3. **Rule selection** — pick which of the 10 universal feedback rules to install in your global layer. Sensible defaults are pre-selected.
+1. **Language** — the language you want Claude to respond in. Code, identifiers, and commit messages stay English regardless; only the conversational layer follows your choice.
+2. **Rule selection** — pick which of the 10 universal feedback rules to install in your global layer. Sensible defaults are pre-selected.
 
 The wizard writes:
 
-- A `<!-- PERSISTMIND START -->` ... `<!-- PERSISTMIND END -->` block in `~/.claude/CLAUDE.md` containing your identity and language preference. The block is idempotent — running `/pm-init` again replaces it without touching anything outside.
+- A `<!-- PERSISTMIND START -->` ... `<!-- PERSISTMIND END -->` block in `~/.claude/CLAUDE.md` containing your language preference and the active feedback rules. The block is idempotent — running `/pm-init` again replaces it without touching anything outside.
 - The selected feedback rules into `~/.claude/memory/persistmind/`.
 - A skeleton `MEMORY.md` index if one does not already exist.
 
