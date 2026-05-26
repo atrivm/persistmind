@@ -2,7 +2,7 @@
 
 > Persistent memory framework for Claude Code. Your AI companion remembers who you are, what you decided, and why — across sessions, projects, and time.
 
-**Status:** v0.1.0 — first public release.
+**Status:** v0.2.0 — observation buffer (Layer 3) now wired and live.
 
 ## What it does
 
@@ -41,7 +41,7 @@ Add the marketplace, install the plugin, then run the setup wizard:
 
 - Claude Code installed.
 - `basic-memory` on `$PATH` — install with `pipx install basic-memory` (recommended) or `pip install basic-memory`.
-- macOS or Linux. Windows not supported in v0.1.0.
+- macOS or Linux. Windows is not supported.
 
 ### Verify
 
@@ -130,4 +130,4 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Status
 
-v0.1.0 is the first public release. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
+v0.2.0. Pre-1.0, so breaking changes are possible between minor versions until 1.0.

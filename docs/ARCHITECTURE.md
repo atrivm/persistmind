@@ -177,7 +177,7 @@ persistmind targets macOS and Linux. OS-specific code paths:
 - **Paths**: always derive from `$HOME` / `~`. No hardcoded absolute paths.
 - **No BSD-only `sed` flags.** Use portable forms.
 
-Windows is not supported in v0.1.0.
+Windows is not supported.
 
 ## Environment variables
 

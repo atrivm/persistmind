@@ -36,13 +36,18 @@ EOF
   exit 2
 fi
 
-# Rule 3: git push --force on main/master
-if echo "$command" | grep -qE 'git\s+push' && echo "$command" | grep -qE -- '(--force\b|-f\b|\+)' && echo "$command" | grep -qE '\b(main|master)\b'; then
-  cat >&2 <<'EOF'
+# Rule 3: force-push to main/master — an explicit flag (--force/-f) targeting
+# main/master, or a leading-'+' refspec adjacent to the ref (e.g. +main). A bare
+# '+' elsewhere (e.g. inside an echo in a compound command) must not trigger.
+if echo "$command" | grep -qE 'git\s+push'; then
+  if { echo "$command" | grep -qE -- '(--force-with-lease\b|--force\b|-f\b)' && echo "$command" | grep -qE '\b(main|master)\b'; } \
+     || echo "$command" | grep -qE -- '\+[^[:space:]]*(main|master)\b'; then
+    cat >&2 <<'EOF'
 [HOOK BLOCK] git push --force on main/master
 Reason: irreversible destructive operation on a primary branch. Ask the user for explicit confirmation.
 EOF
-  exit 2
+    exit 2
+  fi
 fi
 
 # Rule 4: --no-gpg-sign / --no-verify in other forms

@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "persistmind",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./",
       "description": "Persistent memory framework for Claude Code. Three-layer architecture (user global, per-project, observation buffer), slash commands for capture and recall, deterministic hooks for automatic context injection, and skills for memory curation."
     }

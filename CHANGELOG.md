@@ -4,7 +4,7 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-05-27
 
 ### Added
 
@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - The `UserPromptSubmit` injection hook now skips the observations project when scanning for pinned memories, so the growing buffer never slows prompt-time injection.
 - README and `docs/ARCHITECTURE.md` updated: the third layer now documents a real path and capture/recall flow; basic-memory's AGPL-3.0 license and arms-length dependency relationship are noted.
+
+### Fixed
+
+- `block_dangerous_git` no longer blocks a plain `git push origin main`. The leading-`+` force-refspec check is now scoped to a `+` adjacent to the ref (e.g. `+main`), so an unrelated `+` elsewhere in a compound command (such as inside an `echo`) no longer triggers a false positive.
 
 ## [0.1.0] - 2026-05-26
 
