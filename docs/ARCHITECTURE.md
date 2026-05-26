@@ -10,7 +10,7 @@ persistmind treats long-term memory as a **layered store of typed Markdown fragm
 |---|---|---|
 | **User global** | `~/.claude/memory/persistmind/` | Identity, universal preferences, cross-project rules |
 | **Project** | `~/.claude/projects/<slug>/memory/` | Decisions, pivots, constraints scoped to one codebase |
-| **Observation buffer** | passive capture | Session traces queryable on demand |
+| **Observation buffer** | `~/.claude/observations/` | One auto-captured note per session — searchable, never auto-injected |
 
 Each layer is a directory of `.md` files. The top of each layer has a `MEMORY.md` index that the Claude Code harness always loads. Fragment files are loaded on demand (by the user, by hooks, or via semantic search).
 
@@ -30,10 +30,19 @@ The split exists so that a rule learned in one project (e.g. "never `--no-verify
 │       └── memory/
 │           ├── MEMORY.md              # Project index (always loaded for that project)
 │           └── *.md                   # Project-scoped fragments
+├── observations/                      # Layer 3 — passive session capture
+│   └── <project-slug>/
+│       └── <date>-<session-id>.md     # One note per session (searchable, never auto-injected)
 └── backups/                           # /pm-forget writes here before deletion
 ```
 
 `<project-slug>` is the Claude Code project identifier — derived from the working directory path.
+
+## Observation buffer (Layer 3)
+
+The `SessionEnd` hook (`hooks/capture_observation.sh`) writes one Markdown note per session into `~/.claude/observations/<project-slug>/`. It is **deterministic**: it parses the session transcript and records what is already there — the user prompts, a per-tool usage count, and the files touched (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`). No LLM runs in the hook; intelligent distillation stays the job of `/pm-checkpoint`.
+
+These notes are registered as the `persistmind-observations` basic-memory project, so `/pm-recall` searches them alongside the curated layers. They are deliberately **excluded** from prompt-time injection (the `UserPromptSubmit` hook skips this project) and from the always-loaded indexes — the buffer is queried on demand, not pushed into every prompt. Sessions with no real user prompts are skipped to avoid noise.
 
 ## Memory format
 

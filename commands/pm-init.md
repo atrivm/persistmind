@@ -137,21 +137,30 @@ Interpret the result and pick the project name to use for the status check in 3f
 basic-memory status --project "<project resolved in 3e>" 2>&1 | tail -5
 ```
 
+**3g. Register the observation buffer (Layer 3)** (idempotent, best-effort):
+The `SessionEnd` hook writes one Markdown note per session to `~/.claude/observations/`. Pre-create the directory and register its project so recall works before the first session ends:
+```bash
+mkdir -p ~/.claude/observations
+basic-memory project add "${PM_OBSERVATIONS_PROJECT:-persistmind-observations}" ~/.claude/observations 2>&1 | head -5
+```
+Same interpretation rules as 3e (`already exists` / `nested within` / `command not found` are all non-fatal). The hook also self-registers lazily, so this step only makes the layer searchable immediately.
+
 ### Step 4 — Final report
 
 Print to the user:
 
 ```
 Persistmind initialized.
-  Storage:     ~/.claude/memory/persistmind/
-  Rules:       N activated, M skipped
-  CLAUDE.md:   block <added | updated>
-  Sync:        <ok (persistmind-global) | covered by <project> | basic-memory not found>
+  Storage:      ~/.claude/memory/persistmind/
+  Observations: ~/.claude/observations/ (passive session capture)
+  Rules:        N activated, M skipped
+  CLAUDE.md:    block <added | updated>
+  Sync:         <ok (persistmind-global) | covered by <project> | basic-memory not found>
 
 Next steps:
-  /pm-remember "<fact>"       — capture a project fact
+  /pm-remember "<fact>"        — capture a project fact
   /pm-remember-global "<fact>" — capture a cross-project rule
-  /pm-checkpoint              — end-of-session memory review
+  /pm-checkpoint               — end-of-session memory review
 ```
 
 ## Constraints

@@ -15,6 +15,7 @@ import glob
 BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
 BM_CONFIG = os.path.expanduser('~/.basic-memory/config.json')
 GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
+OBSERVATIONS_PROJECT = os.environ.get('PM_OBSERVATIONS_PROJECT', 'persistmind-observations')
 
 
 def main():
@@ -60,7 +61,7 @@ def collect_pinned(cfg):
     pinned = []
     seen = set()
     for name, p in cfg.get('projects', {}).items():
-        if name == 'main':
+        if name in ('main', OBSERVATIONS_PROJECT):
             continue
         base = os.path.realpath(os.path.expanduser(p.get('path') or ''))
         if not base or not os.path.isdir(base):

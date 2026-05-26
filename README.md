@@ -21,9 +21,9 @@ Three layers:
 
 1. **User global** — `~/.claude/memory/persistmind/` — who you are, universal preferences, cross-project rules.
 2. **Project** — `~/.claude/projects/<slug>/memory/` — decisions, pivots, constraints for the current codebase.
-3. **Observation buffer** — passive capture, queryable on demand.
+3. **Observation buffer** — `~/.claude/observations/` — one auto-captured note per session (prompts, tools, files touched), searchable via `/pm-recall`, never auto-injected.
 
-Backbone: [basic-memory](https://github.com/basicmachines-co/basic-memory) MCP server, declared in the plugin's `.mcp.json` and assumed to be on `$PATH`.
+Backbone: [basic-memory](https://github.com/basicmachines-co/basic-memory) MCP server, declared in the plugin's `.mcp.json` and assumed to be on `$PATH`. basic-memory is a separate AGPL-3.0 dependency, installed independently — persistmind does not bundle or modify it.
 
 For the full model — storage layout, fragment format, manifest, capture/recall flows — see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
@@ -101,9 +101,10 @@ Six skills watch the conversation and propose captures when relevant — nothing
 
 ## Safety hooks
 
-Five deterministic hooks bind to Claude Code lifecycle events:
+Five deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
 
 - **Memory injection** on every prompt (pinned rules + semantic hits).
+- **Observation capture** on session end (one note per session into the observation buffer).
 - **Checkpoint reminder** on session stop (cross-platform notification).
 - **Git safety**: blocks `Co-Authored-By`, `--no-verify`, force-push on `main`, `--no-gpg-sign`.
 - **Version bump guard**: blocks unintended changes to `package.json`, `Cargo.toml`, `pyproject.toml`, `pubspec.yaml`, etc.
