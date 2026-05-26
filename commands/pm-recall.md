@@ -3,7 +3,7 @@ description: Semantic search across all memories (global + every project)
 argument-hint: "<natural-language query>"
 ---
 
-# /recall — Cross-project semantic search
+# /pm-recall — Cross-project semantic search
 
 Search across all memories (global + every registered Claude Code project) for the entries most relevant to the query.
 
@@ -64,8 +64,8 @@ Then present the results to the user as a Markdown table:
 
 ## Suggest follow-up actions when relevant
 - "Want me to open the full file?"
-- "Worth `/promote <slug>`? This rule is universal but lives only in one project."
-- "No match → want me to `/remember-global <topic>` to write it?"
+- "Worth `/pm-promote <slug>`? This rule is universal but lives only in one project."
+- "No match → want me to `/pm-remember-global <topic>` to write it?"
 
 ## Constraints
 - Maximum 10 hits in the table.

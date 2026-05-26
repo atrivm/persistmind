@@ -59,7 +59,7 @@ Recognize the equivalent phrases in the user's working language.
 
    ...
 
-   Want me to open the full file of one of these? Or want to `/promote` one that should be global?
+   Want me to open the full file of one of these? Or want to `/pm-promote` one that should be global?
    ```
 
    If no relevant match:
@@ -67,7 +67,7 @@ Recognize the equivalent phrases in the user's working language.
    **No memory match for this topic.**
 
    Possible reasons:
-   - We haven't saved it yet (want to `/remember` or `/remember-global`?)
+   - We haven't saved it yet (want to `/pm-remember` or `/pm-remember-global`?)
    - We discussed it but didn't consolidate (it was an ephemeral conversation)
    - The search pattern was too specific — let me retry with synonyms: "<alt keywords>"
 
@@ -79,4 +79,4 @@ Recognize the equivalent phrases in the user's working language.
 - Do not invent matches. If there's nothing, say so clearly.
 - Maximum 5 results in the first pass. If the user wants more, run a second targeted query.
 - Always include the SCOPE (global / project name) for each hit — it clarifies where the memory lives.
-- If you find a memory from project X while the user is working on Y, flag it: "This memory is from project X — possibly a candidate for `/promote` to global."
+- If you find a memory from project X while the user is working on Y, flag it: "This memory is from project X — possibly a candidate for `/pm-promote` to global."

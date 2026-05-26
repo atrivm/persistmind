@@ -3,7 +3,7 @@ description: Distill the current conversation into a list of consolidated facts 
 argument-hint: "(optional) focus area"
 ---
 
-# /distill — Conversation distillation
+# /pm-distill — Conversation distillation
 
 Extract from the current conversation only the consolidated facts, in a concise and actionable form. Do NOT save anything — produce a readable report only.
 
@@ -48,7 +48,7 @@ Extract from the current conversation only the consolidated facts, in a concise 
 
 5. **Do not save anything.** Output only.
 
-6. **Suggest at the end of output:** "To save these entries, use `/checkpoint`. For individual entries, use `/remember` or `/remember-global`."
+6. **Suggest at the end of output:** "To save these entries, use `/pm-checkpoint`. For individual entries, use `/pm-remember` or `/pm-remember-global`."
 
 ## When to use
 - To take stock mid-session.

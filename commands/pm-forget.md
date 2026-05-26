@@ -3,7 +3,7 @@ description: Remove a memory (global or project) after confirmation
 argument-hint: "<memory-name-to-remove>"
 ---
 
-# /forget — Memory removal
+# /pm-forget — Memory removal
 
 Remove the memory `$ARGUMENTS`.
 

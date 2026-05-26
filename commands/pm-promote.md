@@ -3,7 +3,7 @@ description: Promote a memory from project to global (User) scope
 argument-hint: "<memory-name-to-promote>"
 ---
 
-# /promote — Promote memory to global
+# /pm-promote — Promote memory to global
 
 Promote the memory `$ARGUMENTS` from the current project to the global User layer.
 

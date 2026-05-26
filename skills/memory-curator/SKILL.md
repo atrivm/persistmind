@@ -1,6 +1,6 @@
 ---
 name: memory-curator
-description: When the user wants to write a memory (any of /remember, /remember-global, or just dictates "remember that..."), reshape it into the typed-fragment format with frontmatter (name, description, type, tags) and Why/How-to-apply body. Also use when reviewing/editing existing memory files in ~/.claude/memory/ or ~/.claude/projects/*/memory/. Ensures memories follow the Memory Contract defined in ~/.claude/CLAUDE.md.
+description: When the user wants to write a memory (any of /pm-remember, /pm-remember-global, or just dictates "remember that..."), reshape it into the typed-fragment format with frontmatter (name, description, type, tags) and Why/How-to-apply body. Also use when reviewing/editing existing memory files in ~/.claude/memory/ or ~/.claude/projects/*/memory/. Ensures memories follow the Memory Contract defined in ~/.claude/CLAUDE.md.
 metadata:
   version: 1.0.0
 ---

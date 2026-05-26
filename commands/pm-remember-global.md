@@ -3,17 +3,17 @@ description: Save a rule/preference to the global User layer (applies to all pro
 argument-hint: "<content to remember globally> [--type feedback|reference|user]"
 ---
 
-# /remember-global — Global (User) memory capture
+# /pm-remember-global — Global (User) memory capture
 
 Save the following information as a GLOBAL memory fragment — visible across all projects.
 
 **Input:** $ARGUMENTS
 
-## When to use /remember-global vs /remember
+## When to use /pm-remember-global vs /pm-remember
 - Global: universal interaction rule, personal preference, cross-project pointer, identity.
 - Project: fact/decision/pivot specific to a single project.
 
-If in doubt: PROJECT. You can always `/promote` later when it becomes clear it applies everywhere.
+If in doubt: PROJECT. You can always `/pm-promote` later when it becomes clear it applies everywhere.
 
 ## Procedure
 

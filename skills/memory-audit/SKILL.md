@@ -67,7 +67,7 @@ Compose a table:
 ### Stale (no recall in 6 months)
 | Memory | Age | Scope | Suggested action |
 |---|---|---|---|
-| feedback_old_X | 8 months | global | review or /forget |
+| feedback_old_X | 8 months | global | review or /pm-forget |
 
 ### Duplicates (cosine > 0.92)
 | Memory A | Memory B | Score |
@@ -85,9 +85,9 @@ Compose a table:
 ### 8. Suggested actions
 
 For each issue, propose:
-- **Stale**: `/forget <name>` or `edit` to refresh relevance
-- **Duplicate**: `/promote <A>` if one is already global, or merge → `edit` one and `/forget` the other
-- **Orphan**: add `[[link]]` to/from related memories, or `/forget` if truly isolated
+- **Stale**: `/pm-forget <name>` or `edit` to refresh relevance
+- **Duplicate**: `/pm-promote <A>` if one is already global, or merge → `edit` one and `/pm-forget` the other
+- **Orphan**: add `[[link]]` to/from related memories, or `/pm-forget` if truly isolated
 - **Conflict**: manual edit with the user to clarify which one wins
 
 ### 9. Execute confirmed actions

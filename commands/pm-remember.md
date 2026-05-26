@@ -3,7 +3,7 @@ description: Save a fact/rule/decision in the current project as a typed fragmen
 argument-hint: "<content to remember> [--type project|decision|pivot|reference|feedback]"
 ---
 
-# /remember — Project memory capture
+# /pm-remember — Project memory capture
 
 Save the following information as a memory fragment in the current project.
 

@@ -47,7 +47,7 @@ At the start of a session, or on request, summarize the current project state fr
    <Any `project_*` or `decision_*` entries with status "open" or "in progress">
 
    ### Last checkpoint
-   <Date of the last `/checkpoint` (look in the project's MEMORY.md or the filesystem mtime)>
+   <Date of the last `/pm-checkpoint` (look in the project's MEMORY.md or the filesystem mtime)>
    ```
 
 4. **Print it to the user.** Maximum 30-40 lines total. Brevity over completeness.

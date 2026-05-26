@@ -3,7 +3,7 @@ description: Analyze the current session and propose what to save to memory befo
 argument-hint: "(optional) focus area, e.g. 'architectural decisions'"
 ---
 
-# /checkpoint — End-of-session consolidation
+# /pm-checkpoint — End-of-session consolidation
 
 Analyze the entire current conversation and propose a list of memories to save BEFORE `/clear` is run.
 
@@ -23,7 +23,7 @@ Analyze the entire current conversation and propose a list of memories to save B
    For each item, decide: is it specific to this project, or universal?
    - Universal → global
    - Specific → project
-   - In doubt → project (you can always `/promote` it later)
+   - In doubt → project (you can always `/pm-promote` it later)
 
 3. **Categorize by type.** project | decision | pivot | feedback | reference.
 
@@ -36,7 +36,7 @@ Analyze the entire current conversation and propose a list of memories to save B
 
 5. **Ask for confirmation with AskUserQuestion** (multiSelect) — the user selects which to save. Include "all" and "none" options.
 
-6. **For each confirmed item**, apply the `/remember` or `/remember-global` procedure as appropriate. Do NOT invoke the slash commands — instead, use Write directly on the filesystem + update the index + `basic-memory sync`.
+6. **For each confirmed item**, apply the `/pm-remember` or `/pm-remember-global` procedure as appropriate. Do NOT invoke the slash commands — instead, use Write directly on the filesystem + update the index + `basic-memory sync`.
 
 7. **Final report.** One line per file written.
 
