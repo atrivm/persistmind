@@ -87,7 +87,7 @@ After `/pm-init`:
 
 ### Hooks
 
-- **`inject_memory_context`** — submit any prompt; verify the conversation context shows a `## Memorie auto-iniettate` block above your input (visible by inspecting the model's view, or by checking `~/.claude/logs/` if enabled).
+- **`inject_memory_context`** — submit any prompt; verify the conversation context shows a `## Auto-injected memories` block above your input (visible by inspecting the model's view, or by checking `~/.claude/logs/` if enabled).
 - **`propose_checkpoint`** — end a session; verify the OS notification fires (macOS notification center / Linux `notify-send`) or falls back to stderr.
 - **`block_dangerous_git`** — try `git commit -m "test" --no-verify`; verify the hook blocks with an explanatory error.
 - **`block_version_bump`** — try editing the `version` field in `package.json`; verify the hook blocks.

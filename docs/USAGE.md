@@ -88,7 +88,7 @@ You don't need to do anything to read pinned memories or relevant context. The `
 - **Pinned memories** — fragments with `always_inject: true` in frontmatter. These are loaded every turn.
 - **Semantic hits** — basic-memory searches the global layer and the current project's layer against your prompt and injects the top matches.
 
-You'll see them as a `## Memorie auto-iniettate` block above your prompt in the model's context (visible if you inspect the conversation, not in your typed input).
+You'll see them as a `## Auto-injected memories` block above your prompt in the model's context (visible if you inspect the conversation, not in your typed input).
 
 ### Explicit recall
 

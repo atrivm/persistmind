@@ -165,7 +165,7 @@ Two paths:
 **Automatic, every prompt.** `UserPromptSubmit` hook runs `inject_memory_context.py`, which:
 1. Loads all fragments with `always_inject: true` (pinned rules).
 2. Runs a basic-memory semantic search against the user's prompt across the global layer and the current project's layer.
-3. Injects the top hits as a `## Memorie auto-iniettate` block above the user prompt.
+3. Injects the top hits as a `## Auto-injected memories` block above the user prompt.
 
 **On-demand, explicit.** `/pm-recall <topic>` runs a cross-project semantic search (every registered basic-memory project) and surfaces the top-ranked hits with scope and excerpt.
 
