@@ -20,7 +20,7 @@ No vendor lock-in. No black-box vectors. Memory is plain files you own.
 Three layers:
 
 1. **User global** — `~/.claude/memory/persistmind/` — who you are, universal preferences, cross-project rules.
-2. **Project** — `~/.claude/projects/<slug>/memory/` — decisions, pivots, constraints for the current codebase.
+2. **Project** — `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` — decisions, pivots, constraints for the current codebase (per-account in multi-account setups, e.g. `~/.claude-work/projects/...` for a `claude-work` wrapper alias).
 3. **Observation buffer** — `~/.claude/observations/` — one auto-captured note per session (prompts, tools, files touched), searchable via `/pm-recall`, never auto-injected.
 
 Backbone: [basic-memory](https://github.com/basicmachines-co/basic-memory) MCP server, declared in the plugin's `.mcp.json` and assumed to be on `$PATH`. basic-memory is a separate AGPL-3.0 dependency, installed independently — persistmind does not bundle or modify it.

@@ -20,7 +20,9 @@ import json, os, subprocess
 QUERY = """$ARGUMENTS"""
 GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
 
-with open(os.path.expanduser('~/.basic-memory/config.json')) as f:
+# Multi-account aware: honors BASIC_MEMORY_CONFIG_DIR when set by wrapper aliases.
+bm_dir = os.path.expanduser(os.environ.get('BASIC_MEMORY_CONFIG_DIR') or '~/.basic-memory')
+with open(os.path.join(bm_dir, 'config.json')) as f:
     cfg = json.load(f)
 projects = [n for n in cfg.get('projects', {}) if n != 'main']
 

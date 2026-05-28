@@ -138,10 +138,11 @@ basic-memory status --project "<project resolved in 3e>" 2>&1 | tail -5
 ```
 
 **3g. Register the observation buffer (Layer 3)** (idempotent, best-effort):
-The `SessionEnd` hook writes one Markdown note per session to `~/.claude/observations/`. Pre-create the directory and register its project so recall works before the first session ends:
+The `SessionEnd` hook writes one Markdown note per session to `$CLAUDE_DIR/observations/`, where `$CLAUDE_DIR` is the active Claude Code config dir (default `~/.claude`; multi-account setups like `claude-work` use `~/.claude-work`). Pre-create the directory and register its project so recall works before the first session ends:
 ```bash
-mkdir -p ~/.claude/observations
-basic-memory project add "${PM_OBSERVATIONS_PROJECT:-persistmind-observations}" ~/.claude/observations 2>&1 | head -5
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+mkdir -p "$CLAUDE_DIR/observations"
+basic-memory project add "${PM_OBSERVATIONS_PROJECT:-persistmind-observations}" "$CLAUDE_DIR/observations" 2>&1 | head -5
 ```
 Same interpretation rules as 3e (`already exists` / `nested within` / `command not found` are all non-fatal). The hook also self-registers lazily, so this step only makes the layer searchable immediately.
 
@@ -151,8 +152,8 @@ Print to the user:
 
 ```
 Persistmind initialized.
-  Storage:      ~/.claude/memory/persistmind/
-  Observations: ~/.claude/observations/ (passive session capture)
+  Storage:      ~/.claude/memory/persistmind/      (global — shared across accounts)
+  Observations: <resolved CLAUDE_DIR>/observations/ (per-account passive session capture)
   Rules:        N activated, M skipped
   CLAUDE.md:    block <added | updated>
   Sync:         <ok (persistmind-global) | covered by <project> | basic-memory not found>

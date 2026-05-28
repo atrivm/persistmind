@@ -7,11 +7,13 @@ argument-hint: "<memory-name-to-promote>"
 
 Promote the memory `$ARGUMENTS` from the current project to the global User layer.
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 ## Procedure
 
 1. **Identify the current project.** `pwd` → slug.
 
-2. **Find the memory.** Look for a file in `~/.claude/projects/<slug>/memory/` matching the given name:
+2. **Find the memory.** Look for a file in `$CLAUDE_DIR/projects/<slug>/memory/` matching the given name:
    - Exact match on the filename (without extension)
    - Match on the `name:` field in frontmatter
    - Match on the slug inside the filename

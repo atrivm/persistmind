@@ -7,6 +7,8 @@ metadata:
 
 # Pivot Detector — Capture direction changes
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 When the flow changes direction relative to a previous choice, propose saving it as a pivot in memory.
 
 ## Trigger patterns
@@ -48,7 +50,7 @@ Recognize the equivalent phrases in the user's working language.
    - **Trigger:** what caused it (error? discovery? new constraint?)
    - **Impact:** what changes from here
 
-5. **Create the file** `~/.claude/projects/<slug>/memory/pivot_<slug>.md` via the `pm-memory-curator` skill.
+5. **Create the file** `$CLAUDE_DIR/projects/<slug>/memory/pivot_<slug>.md` via the `pm-memory-curator` skill.
 
 6. **Update the superseded memory.** If it exists, add to its frontmatter:
    ```yaml

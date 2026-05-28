@@ -7,6 +7,8 @@ metadata:
 
 # Memory Audit — Memory system maintenance
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 Periodic audit of global and per-project memories.
 
 ## Procedure
@@ -24,7 +26,8 @@ Ask the user:
 echo "=== Global ==="
 ls ~/.claude/memory/persistmind/ | wc -l
 echo "=== Per-project ==="
-for d in ~/.claude/projects/*/memory/; do
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+for d in "$CLAUDE_DIR"/projects/*/memory/; do
   count=$(ls "$d" 2>/dev/null | grep -v MEMORY.md | wc -l)
   proj=$(basename $(dirname "$d"))
   [ "$count" -gt 0 ] && echo "  $proj: $count"

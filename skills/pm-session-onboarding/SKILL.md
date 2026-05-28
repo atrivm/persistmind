@@ -7,6 +7,8 @@ metadata:
 
 # Session Onboarding — Session-opening brief
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 At the start of a session, or on request, summarize the current project state from memory so the user can resume from where they left off.
 
 ## Procedure
@@ -17,7 +19,7 @@ At the start of a session, or on request, summarize the current project state fr
 
    - **Global (User):** read `~/.claude/memory/persistmind/MEMORY.md` for the list of active cross-project rules.
 
-   - **Project:** read `~/.claude/projects/<slug>/memory/MEMORY.md` (if it exists). If missing, tell the user.
+   - **Project:** read `$CLAUDE_DIR/projects/<slug>/memory/MEMORY.md` (if it exists). If missing, tell the user.
 
    - **Recent activity:** run via Bash against TWO projects (global + current):
      ```bash
@@ -27,7 +29,7 @@ At the start of a session, or on request, summarize the current project state fr
      # (e.g. /home/dev/my-project → "my-project" or encoded form "-home-dev-my-project")
      basic-memory tool recent-activity --page-size 5 --project <slug>
      ```
-     To get the current project's slug, read `~/.basic-memory/config.json` and find the entry whose `path` matches `~/.claude/projects/<encoded-cwd>/memory`.
+     To get the current project's slug, read `${BASIC_MEMORY_CONFIG_DIR:-~/.basic-memory}/config.json` and find the entry whose `path` matches `$CLAUDE_DIR/projects/<encoded-cwd>/memory`.
 
 3. **Compose the brief in 3 sections:**
 

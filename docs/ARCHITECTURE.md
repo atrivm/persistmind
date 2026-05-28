@@ -8,9 +8,9 @@ persistmind treats long-term memory as a **layered store of typed Markdown fragm
 
 | Layer | Path | Holds |
 |---|---|---|
-| **User global** | `~/.claude/memory/persistmind/` | Identity, universal preferences, cross-project rules |
-| **Project** | `~/.claude/projects/<slug>/memory/` | Decisions, pivots, constraints scoped to one codebase |
-| **Observation buffer** | `~/.claude/observations/` | One auto-captured note per session — searchable, never auto-injected |
+| **User global** | `~/.claude/memory/persistmind/` (shared across accounts) | Identity, universal preferences, cross-project rules |
+| **Project** | `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` | Decisions, pivots, constraints scoped to one codebase |
+| **Observation buffer** | `${CLAUDE_CONFIG_DIR:-~/.claude}/observations/` | One auto-captured note per session — searchable, never auto-injected |
 
 Each layer is a directory of `.md` files. The top of each layer has a `MEMORY.md` index that the Claude Code harness always loads. Fragment files are loaded on demand (by the user, by hooks, or via semantic search).
 
@@ -181,10 +181,12 @@ Windows is not supported.
 
 ## Environment variables
 
-Two env vars let you override defaults without editing plugin files:
+Persistmind honors these env vars; defaults preserve the standard single-account behavior:
 
 | Var | Default | Purpose |
 |---|---|---|
+| `CLAUDE_CONFIG_DIR` | `~/.claude` | Active Claude Code config dir. Project memories (`<CLAUDE_CONFIG_DIR>/projects/...`) and observations (`<CLAUDE_CONFIG_DIR>/observations/`) are derived from it. Set by wrapper aliases (e.g. `claude-work`) for per-account isolation. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless. |
+| `BASIC_MEMORY_CONFIG_DIR` | `~/.basic-memory` | Where persistmind looks up basic-memory's `config.json` (and subprocess invocations of basic-memory inherit). Pair with `CLAUDE_CONFIG_DIR` in a multi-account wrapper. |
 | `PM_GLOBAL_PROJECT` | `persistmind-global` | Name of the basic-memory project that backs the user global layer |
 | `PM_BASIC_MEMORY_BIN` | `basic-memory` | Binary name or path to invoke basic-memory (useful if installed via pipx with a non-`PATH` shim) |
 

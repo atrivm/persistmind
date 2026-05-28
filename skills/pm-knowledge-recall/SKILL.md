@@ -7,6 +7,8 @@ metadata:
 
 # Knowledge Recall — Cross-session memory lookup
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 When the user wonders if something has already been done/seen/decided, run a semantic search and surface what memory knows.
 
 ## Trigger patterns (recognize these formulations)
@@ -38,7 +40,8 @@ Recognize the equivalent phrases in the user's working language.
 
 3. **Parallel text search.** To avoid false negatives, also:
    ```bash
-   grep -ril -E "<keyword1>|<keyword2>" ~/.claude/memory/ ~/.claude/projects/*/memory/ 2>/dev/null | head -10
+   CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+   grep -ril -E "<keyword1>|<keyword2>" ~/.claude/memory/ "$CLAUDE_DIR"/projects/*/memory/ 2>/dev/null | head -10
    ```
 
 4. **Dedupe and rank.** Combine the results, dedupe by file_path. Sort by score (semantic primary, then fallback recency).

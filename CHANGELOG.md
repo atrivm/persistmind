@@ -4,6 +4,19 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Multi-account support.** Hooks and slash commands now honor the `CLAUDE_CONFIG_DIR` and `BASIC_MEMORY_CONFIG_DIR` env vars, so a wrapper alias (e.g. `claude-work="CLAUDE_CONFIG_DIR=~/.claude-work BASIC_MEMORY_CONFIG_DIR=~/.basic-memory-work claude"`) gets per-account project memories and observations while sharing the global layer. Project paths follow `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/...`; the basic-memory config path follows `${BASIC_MEMORY_CONFIG_DIR:-~/.basic-memory}/config.json`. Defaults preserve the single-account behavior exactly.
+- `/pm-remember` now auto-registers the current project in basic-memory (idempotent, best-effort) on first save, so semantic search picks up new project memories without a manual `basic-memory project add` step.
+
+### Changed
+
+- `hooks/inject_memory_context.py` and `hooks/capture_observation.py` derive their basic-memory config path and per-account project root from env vars instead of hardcoding `~/.basic-memory/config.json` and `~/.claude/projects/...`.
+- All `pm-*` commands and observer skills document a `$CLAUDE_DIR` path convention and resolve project paths from it. The global layer (`~/.claude/memory/persistmind/`) and `CLAUDE.md` block remain hardcoded — shared across accounts by design.
+- `/pm-init` step 3g pre-creates and registers the observation buffer under `$CLAUDE_DIR/observations/` instead of the fixed `~/.claude/observations/`.
+
 ## [0.2.0] - 2026-05-27
 
 ### Added

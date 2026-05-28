@@ -7,11 +7,13 @@ argument-hint: "<memory-name-to-remove>"
 
 Remove the memory `$ARGUMENTS`.
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 ## Procedure
 
 1. **Search for the memory** across all layers:
-   - `~/.claude/memory/persistmind/` (global)
-   - `~/.claude/projects/*/memory/` (all projects)
+   - `~/.claude/memory/persistmind/` (global — shared across accounts)
+   - `$CLAUDE_DIR/projects/*/memory/` (project layer — scoped to the active account)
 
    Match on filename (without extension) or on the `name:` field in the frontmatter.
 

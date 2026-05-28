@@ -13,7 +13,12 @@ import subprocess
 import glob
 
 BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
-BM_CONFIG = os.path.expanduser('~/.basic-memory/config.json')
+# Multi-account aware: CLAUDE_CONFIG_DIR and BASIC_MEMORY_CONFIG_DIR are set by
+# wrapper aliases (e.g. `claude-work`) to isolate per-account state. Default to
+# `~/.claude` and `~/.basic-memory` when unset.
+CLAUDE_DIR = os.path.expanduser(os.environ.get('CLAUDE_CONFIG_DIR') or '~/.claude')
+BM_CONFIG_DIR = os.path.expanduser(os.environ.get('BASIC_MEMORY_CONFIG_DIR') or '~/.basic-memory')
+BM_CONFIG = os.path.join(BM_CONFIG_DIR, 'config.json')
 GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
 OBSERVATIONS_PROJECT = os.environ.get('PM_OBSERVATIONS_PROJECT', 'persistmind-observations')
 
@@ -49,7 +54,7 @@ def resolve_project_slug(cwd, cfg):
     if not cwd:
         return None
     encoded = re.sub(r'[^a-zA-Z0-9]', '-', os.path.realpath(cwd))
-    target = os.path.realpath(os.path.expanduser(f'~/.claude/projects/{encoded}/memory'))
+    target = os.path.realpath(os.path.join(CLAUDE_DIR, 'projects', encoded, 'memory'))
     for name, p in cfg.get('projects', {}).items():
         path = p.get('path') or ''
         if path and os.path.realpath(os.path.expanduser(path)) == target:

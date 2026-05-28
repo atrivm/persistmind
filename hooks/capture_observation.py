@@ -18,11 +18,15 @@ import subprocess
 from datetime import datetime
 
 BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
-BM_CONFIG = os.path.expanduser('~/.basic-memory/config.json')
+# Multi-account aware: CLAUDE_CONFIG_DIR and BASIC_MEMORY_CONFIG_DIR are set by
+# wrapper aliases (e.g. `claude-work`) to isolate per-account state. Default to
+# `~/.claude` and `~/.basic-memory` when unset.
+CLAUDE_DIR = os.path.expanduser(os.environ.get('CLAUDE_CONFIG_DIR') or '~/.claude')
+BM_CONFIG_DIR = os.path.expanduser(os.environ.get('BASIC_MEMORY_CONFIG_DIR') or '~/.basic-memory')
+BM_CONFIG = os.path.join(BM_CONFIG_DIR, 'config.json')
 OBS_PROJECT = os.environ.get('PM_OBSERVATIONS_PROJECT', 'persistmind-observations')
-OBS_ROOT = os.path.expanduser(
-    os.environ.get('PM_OBSERVATIONS_ROOT', '~/.claude/observations')
-)
+_obs_override = os.environ.get('PM_OBSERVATIONS_ROOT')
+OBS_ROOT = os.path.expanduser(_obs_override) if _obs_override else os.path.join(CLAUDE_DIR, 'observations')
 
 MAX_PROMPTS = 20
 PROMPT_MAXLEN = 280

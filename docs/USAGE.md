@@ -149,7 +149,7 @@ It proposes actions but executes nothing without confirmation.
 
 ## Multi-project workflow
 
-Each Claude Code project gets its own memory directory under `~/.claude/projects/<slug>/memory/`. When you open a new project, the corresponding layer is loaded automatically alongside the global layer.
+Each Claude Code project gets its own memory directory under `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` — i.e. under the active Claude Code config dir, so multi-account wrappers (e.g. `claude-work`) get isolated project memories automatically. When you open a new project, the corresponding layer is loaded automatically alongside the global layer.
 
 basic-memory tracks each project as a separate indexed collection. Cross-project search (`/pm-recall`) walks them all. The global layer is itself a basic-memory project (default name `persistmind-global`, override via `PM_GLOBAL_PROJECT`).
 

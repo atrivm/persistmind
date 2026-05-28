@@ -7,6 +7,8 @@ metadata:
 
 # Decision Logger — Architectural decision capture
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 When a decision is made, propose to the user that you save it to memory along with the why.
 
 ## Trigger patterns
@@ -41,7 +43,7 @@ Recognize the equivalent phrases in the user's working language.
 
 5. **Generate the fragment** via the `pm-memory-curator` skill (type: decision).
 
-6. **Save** to `~/.claude/projects/<slug>/memory/decision_<slug>.md`.
+6. **Save** to `$CLAUDE_DIR/projects/<slug>/memory/decision_<slug>.md`.
 
 7. **Update the project's MEMORY.md index.**
 

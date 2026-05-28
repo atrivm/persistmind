@@ -18,5 +18,5 @@ Do NOT create `.md` files (README, NOTES, PLAN, ANALYSIS, design.md, etc.) witho
 - Refactor → no `MIGRATION.md`.
 - Analysis / audit → report results in the chat, not in a file, unless the user asks for a file.
 - Explicit exception: the user says "write a README", "put it in a file", or "save it as a document".
-- Structural exception: typed memory files (`~/.claude/memory/persistmind/*.md`, `~/.claude/projects/*/memory/*.md`) created by the `/pm-*` commands.
+- Structural exception: typed memory files (`~/.claude/memory/persistmind/*.md`, `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/*/memory/*.md`) created by the `/pm-*` commands.
 - If in doubt whether a file is needed, ask — do not create.

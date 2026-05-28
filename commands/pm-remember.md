@@ -9,9 +9,11 @@ Save the following information as a memory fragment in the current project.
 
 **Input:** $ARGUMENTS
 
+> **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
+
 ## Procedure
 
-1. **Identify the current project.** Run `pwd` via Bash, take the path, and slugify it (e.g. `/home/dev/my-project` → `-home-dev-my-project`). The project memory path is `~/.claude/projects/<slug>/memory/`.
+1. **Identify the current project.** Run `pwd` via Bash, take the path, and slugify it (e.g. `/home/dev/my-project` → `-home-dev-my-project`). The project memory path is `$CLAUDE_DIR/projects/<slug>/memory/`.
 
 2. **Determine the type.** If the user did not specify, infer between:
    - `project` — stable fact about the project (architecture, stack, constraint)
@@ -38,11 +40,16 @@ metadata:
    - `pivot`: date | from X to Y | trigger | impact.
    - `reference`: what it is | URL/path | when to consult it.
 
-5. **Write the file** to `~/.claude/projects/<slug>/memory/<type>_<slug>.md` via the Write tool. Create the directory if it does not exist.
+5. **Write the file** to `$CLAUDE_DIR/projects/<slug>/memory/<type>_<slug>.md` via the Write tool. Create the directory if it does not exist.
 
-6. **Update the index** `~/.claude/projects/<slug>/memory/MEMORY.md`: add a line in the appropriate section with `- [<slug>](<type>_<slug>.md) — <description>`.
+6. **Update the index** `$CLAUDE_DIR/projects/<slug>/memory/MEMORY.md`: add a line in the appropriate section with `- [<slug>](<type>_<slug>.md) — <description>`.
 
-7. **Semantic sync** (optional, if basic-memory has a project mapping this folder): notify the user that the save is done; basic-memory auto-indexes via its background watcher. Check with `basic-memory status 2>&1 | tail -5`.
+7. **Auto-register the project in basic-memory** (idempotent, best-effort). Needed so `/pm-recall` and semantic injection can see this project's memories. Run via Bash:
+   ```bash
+   PROJECT_NAME=$(echo "<slug>" | sed 's/^-//' | tr '[:upper:]' '[:lower:]')
+   basic-memory project add "$PROJECT_NAME" "<CLAUDE_DIR>/projects/<slug>/memory" 2>&1 | head -3 || true
+   ```
+   Substitute `<slug>` with the slug from step 1 and `<CLAUDE_DIR>` with the resolved active config dir. `already exists` and `nested within existing project '<X>'` are both non-fatal. basic-memory's background watcher indexes the new file automatically. Optionally confirm with `basic-memory status 2>&1 | tail -5`.
 
 8. **Confirm to the user** in one line: "Memory saved: `<path>` (type: <type>, slug: <slug>)".
 
