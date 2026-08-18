@@ -4,7 +4,7 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-08-18
 
 ### Added
 
@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `hooks/inject_memory_context.py` and `hooks/capture_observation.py` derive their basic-memory config path and per-account project root from env vars instead of hardcoding `~/.basic-memory/config.json` and `~/.claude/projects/...`.
 - All `pm-*` commands and observer skills document a `$CLAUDE_DIR` path convention and resolve project paths from it. The global layer (`~/.claude/memory/persistmind/`) and `CLAUDE.md` block remain hardcoded — shared across accounts by design.
 - `/pm-init` step 3g pre-creates and registers the observation buffer under `$CLAUDE_DIR/observations/` instead of the fixed `~/.claude/observations/`.
+
+### Fixed
+
+- **Pinned memories now inject their full body.** The `UserPromptSubmit` hook used to emit a bare pointer line ("read the file for details") for `always_inject: true` memories, which carried no behavioral weight — the model almost never opened the file, so pinned rules were routinely ignored. The hook now injects the frontmatter-stripped body of each pinned memory (capped at 3500 chars) under an imperative "standing user instructions" header, and handles the doubled frontmatter blocks that basic-memory sync can prepend.
 
 ## [0.2.0] - 2026-05-27
 
