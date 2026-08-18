@@ -21,6 +21,10 @@ BM_CONFIG_DIR = os.path.expanduser(os.environ.get('BASIC_MEMORY_CONFIG_DIR') or 
 BM_CONFIG = os.path.join(BM_CONFIG_DIR, 'config.json')
 GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
 OBSERVATIONS_PROJECT = os.environ.get('PM_OBSERVATIONS_PROJECT', 'persistmind-observations')
+# Pinned memories are injected with their FULL body: a bare pointer line proved
+# to carry no behavioral weight (the model never opens the file). The cap keeps
+# an oversized pin from bloating every single prompt.
+PIN_BODY_MAX = 3500
 
 
 def main():
@@ -62,6 +66,16 @@ def resolve_project_slug(cwd, cfg):
     return None
 
 
+# basic-memory sync may prepend a second permalink-only frontmatter block, so
+# strip leading blocks repeatedly until real content starts.
+def strip_frontmatter(text: str) -> str:
+    while True:
+        m = re.match(r'\A\s*---\s*\n.*?\n---\s*\n', text, re.DOTALL)
+        if not m:
+            return text.strip()
+        text = text[m.end():]
+
+
 def collect_pinned(cfg):
     pinned = []
     seen = set()
@@ -77,9 +91,10 @@ def collect_pinned(cfg):
             try:
                 with open(md, 'r', encoding='utf-8') as fh:
                     head = fh.read(2000)
+                    if not re.search(r'^\s*always_inject:\s*true\s*$', head, re.MULTILINE):
+                        continue
+                    text = head + fh.read()
             except Exception:
-                continue
-            if not re.search(r'^\s*always_inject:\s*true\s*$', head, re.MULTILINE):
                 continue
             rel = os.path.relpath(md, base)
             key = (name, rel)
@@ -89,7 +104,10 @@ def collect_pinned(cfg):
             m = re.search(r'^name:\s*(.+)$', head, re.MULTILINE)
             title = m.group(1).strip() if m else os.path.basename(md).removesuffix('.md')
             scope = 'global' if name == GLOBAL_PROJECT else name
-            pinned.append({'scope': scope, 'title': title, 'file': rel})
+            body = strip_frontmatter(text)
+            if len(body) > PIN_BODY_MAX:
+                body = body[:PIN_BODY_MAX] + f'\n…[truncated — read `{rel}` for the rest]'
+            pinned.append({'scope': scope, 'title': title, 'file': rel, 'body': body})
     return pinned
 
 
@@ -130,15 +148,28 @@ def collect_semantic(prompt, project_slug, pinned):
 
 def print_output(pinned, semantic, project_slug):
     lines = ['', '## Auto-injected memories', '']
-    for p in pinned:
-        lines.append(f"- [PIN/{p['scope']}] [{p['title']}]({p['file']}) — always-injected (read the file for details)")
-    for s in semantic:
-        lines.append(f"- [{s['scope']}] [{s['title']}]({s['file']}) — {s['excerpt']}")
+    if pinned:
+        lines.append('### Pinned rules — standing user instructions')
+        lines.append('')
+        lines.append('The user wrote these rules and pinned them (`always_inject: true`). '
+                     'Apply them to this reply as if they were typed in the current '
+                     'message — they are instructions, not background context.')
+        for p in pinned:
+            lines.append('')
+            lines.append(f"#### [{p['scope']}] {p['title']} (`{p['file']}`)")
+            lines.append('')
+            lines.append(p['body'] or f"(empty body — read `{p['file']}`)")
+    if semantic:
+        lines.append('')
+        lines.append('### Possibly relevant memories (background context)')
+        lines.append('')
+        for s in semantic:
+            lines.append(f"- [{s['scope']}] [{s['title']}]({s['file']}) — {s['excerpt']}")
     lines.append('')
     src = f'basic-memory `{GLOBAL_PROJECT}`'
     if project_slug and project_slug != GLOBAL_PROJECT:
         src += f' + `{project_slug}`'
-    lines.append(f"_Source: {src}. PIN = always-injected (`always_inject: true`)._")
+    lines.append(f'_Source: {src}._')
     print('\n'.join(lines))
 
 
