@@ -4,6 +4,12 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-09-01
+
+### Fixed
+
+- Newly registered basic-memory projects were never indexed for semantic search: running `basic-memory mcp` watchers only cover projects that existed at startup, so fragments saved to a brand-new project were injected via hooks but invisible to `/pm-recall` (silent failure). `/pm-remember` and `/pm-checkpoint` now run `basic-memory reindex --project <name>` right after `project add` / after writing fragments, and verify with `basic-memory status`.
+
 ## [0.3.0] - 2026-08-18
 
 ### Added

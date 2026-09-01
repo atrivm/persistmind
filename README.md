@@ -2,7 +2,7 @@
 
 > Persistent memory framework for Claude Code. Your AI companion remembers who you are, what you decided, and why — across sessions, projects, and time.
 
-**Status:** v0.3.0 — multi-account isolation and full-body pinned memory injection.
+**Status:** v0.3.1 — newly registered basic-memory projects are reindexed right after registration, so semantic search sees them.
 
 ## What it does
 
@@ -130,4 +130,4 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Status
 
-v0.3.0. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
+v0.3.1. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
