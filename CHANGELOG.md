@@ -4,6 +4,13 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-09-25
+
+### Fixed
+
+- **A slow semantic search no longer drops the pinned rules.** The `UserPromptSubmit` hook ran the global and project searches one after the other, each allowed 10 s, while `hooks.json` gives the hook 15 s. One stuck search (a cold `basic-memory` start on a loaded machine) pushed the hook past its timeout, and Claude Code discarded the whole output, pinned memories included. The searches now run in parallel under one deadline, 10 s after the hook starts; a search still running is killed without waiting and only its hits are lost. Search output goes to temp files, so a finished search is never lost behind a stuck one.
+- **Project memories are found from subfolders.** The hook matched the current project only on the exact working directory, so a session that moved into a subfolder (`repo/backend`) searched the global layer alone. It now uses the nearest ancestor directory with a registered project memory.
+
 ## [0.3.1] - 2026-09-01
 
 ### Fixed
