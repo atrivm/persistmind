@@ -5,12 +5,17 @@ Reads {prompt, cwd, ...} JSON on stdin, prints to stdout:
   1) PINNED memories (frontmatter `always_inject: true`) — always shown
   2) SEMANTIC top-3 from the global project + the current cwd's project
 """
+from __future__ import annotations
+
 import json
 import os
 import re
 import sys
 import subprocess
 import glob
+import tempfile
+import time
+from typing import IO, TypedDict
 
 BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
 # Multi-account aware: CLAUDE_CONFIG_DIR and BASIC_MEMORY_CONFIG_DIR are set by
@@ -25,6 +30,21 @@ OBSERVATIONS_PROJECT = os.environ.get('PM_OBSERVATIONS_PROJECT', 'persistmind-ob
 # to carry no behavioral weight (the model never opens the file). The cap keeps
 # an oversized pin from bloating every single prompt.
 PIN_BODY_MAX = 3500
+# Semantic searches must end this long after the hook starts. Past the hook
+# timeout in hooks.json (15 s) Claude Code discards the whole output, pinned
+# rules included; a search still running at the deadline (a cold start on a
+# loaded machine) only loses its own hits.
+SEARCH_DEADLINE_S = 10.0
+HOOK_START = time.monotonic()
+
+
+class SearchHit(TypedDict, total=False):
+    """The fields this hook reads from a basic-memory search result."""
+    title: str
+    file_path: str
+    score: float
+    matched_chunk: str
+    content: str
 
 
 def main():
@@ -54,16 +74,27 @@ def main():
     print_output(pinned, semantic, project_slug)
 
 
-def resolve_project_slug(cwd, cfg):
+def resolve_project_slug(cwd: str, cfg: dict) -> str | None:
+    """The project of the nearest directory, from cwd upward, with a registered
+    project memory: a session that moved into a subfolder (repo/backend) keeps
+    its repo's memories."""
     if not cwd:
         return None
-    encoded = re.sub(r'[^a-zA-Z0-9]', '-', os.path.realpath(cwd))
-    target = os.path.realpath(os.path.join(CLAUDE_DIR, 'projects', encoded, 'memory'))
+    by_path = {}
     for name, p in cfg.get('projects', {}).items():
         path = p.get('path') or ''
-        if path and os.path.realpath(os.path.expanduser(path)) == target:
-            return name
-    return None
+        if path:
+            by_path[os.path.realpath(os.path.expanduser(path))] = name
+    directory = os.path.realpath(cwd)
+    while True:
+        encoded = re.sub(r'[^a-zA-Z0-9]', '-', directory)
+        target = os.path.realpath(os.path.join(CLAUDE_DIR, 'projects', encoded, 'memory'))
+        if target in by_path:
+            return by_path[target]
+        parent = os.path.dirname(directory)
+        if parent == directory:
+            return None
+        directory = parent
 
 
 # basic-memory sync may prepend a second permalink-only frontmatter block, so
@@ -111,24 +142,52 @@ def collect_pinned(cfg):
     return pinned
 
 
-def query_project(proj, prompt):
-    try:
-        out = subprocess.check_output(
-            [BM, 'tool', 'search-notes', prompt, '--project', proj],
-            stderr=subprocess.DEVNULL, text=True, timeout=10
-        )
-        return json.loads(out).get('results', []) or []
-    except Exception:
-        return []
+def query_projects(projects: list[str], prompt: str) -> list[list[SearchHit]]:
+    """Searches all projects in parallel; per project, the hits of a search
+    that finished before the deadline, else an empty list. Output goes to temp
+    files, so a finished search never waits on a stuck one to be read."""
+    deadline = HOOK_START + SEARCH_DEADLINE_S
+    runs: list[tuple[subprocess.Popen[bytes] | None, IO[bytes] | None]] = []
+    for proj in projects:
+        proc, out = None, None
+        try:
+            out = tempfile.TemporaryFile()
+            proc = subprocess.Popen(
+                [BM, 'tool', 'search-notes', prompt, '--project', proj],
+                stdout=out, stderr=subprocess.DEVNULL
+            )
+        except Exception:
+            pass
+        runs.append((proc, out))
+    while time.monotonic() < deadline and any(
+            proc is not None and proc.poll() is None for proc, _ in runs):
+        time.sleep(0.05)
+    results: list[list[SearchHit]] = []
+    for proc, out in runs:
+        hits: list[SearchHit] = []
+        if proc is not None and proc.poll() is None:
+            # Kill without waiting: a process stuck on I/O may take long to
+            # die, and waiting would push the hook past its timeout.
+            proc.kill()
+        elif proc is not None and out is not None and proc.returncode == 0:
+            try:
+                out.seek(0)
+                hits = json.loads(out.read()).get('results', []) or []
+            except Exception:
+                pass
+        if out is not None:
+            out.close()
+        results.append(hits)
+    return results
 
 
-def collect_semantic(prompt, project_slug, pinned):
+def collect_semantic(prompt: str, project_slug: str | None, pinned: list[dict]) -> list[dict]:
     semantic = []
     targets = [GLOBAL_PROJECT]
     if project_slug and project_slug != GLOBAL_PROJECT:
         targets.append(project_slug)
-    for proj in targets:
-        for r in query_project(proj, prompt):
+    for proj, hits in zip(targets, query_projects(targets, prompt)):
+        for r in hits:
             if r.get('score', 0) > 0.5:
                 scope = 'global' if proj == GLOBAL_PROJECT else proj
                 semantic.append({
