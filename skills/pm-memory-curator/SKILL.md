@@ -90,7 +90,7 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
 
 10. **Update the corresponding MEMORY.md index.**
 
-11. **Verify basic-memory pickup** via `basic-memory status 2>&1 | tail -5`.
+11. **Index and verify** via `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path <saved file>`: basic-memory does not watch files, so the script reindexes the file's project and prints its status, which must show `No changes`. If the script path does not exist, run `basic-memory reindex --project <name>` and `basic-memory status --project <name>` instead.
 
 ## Constraints
 

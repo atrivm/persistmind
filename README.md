@@ -101,9 +101,10 @@ Six skills watch the conversation and propose captures when relevant — nothing
 
 ## Safety hooks
 
-Five deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
+Six deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
 
 - **Memory injection** on every prompt (pinned rules + semantic hits).
+- **Memory reindex** after each Write/Edit of a memory file and at session start, one run at a time (basic-memory's own file watcher is turned off, see `docs/ARCHITECTURE.md`).
 - **Observation capture** on session end (one note per session into the observation buffer).
 - **Checkpoint reminder** on session stop (cross-platform notification).
 - **Git safety**: blocks `Co-Authored-By`, `--no-verify`, force-push on `main`, `--no-gpg-sign`.

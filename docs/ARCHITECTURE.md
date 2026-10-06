@@ -90,13 +90,16 @@ Declares the MCP server stack the plugin depends on. persistmind registers exact
   "mcpServers": {
     "basic-memory": {
       "command": "basic-memory",
-      "args": ["mcp"]
+      "args": ["mcp"],
+      "env": {"BASIC_MEMORY_SYNC_CHANGES": "false"}
     }
   }
 }
 ```
 
 [basic-memory](https://github.com/basicmachines-co/basic-memory) is the semantic search backbone — it indexes the Markdown fragments and exposes search/recall via MCP tools. The plugin assumes `basic-memory` is on `$PATH` (configurable via `PM_BASIC_MEMORY_BIN`).
+
+`BASIC_MEMORY_SYNC_CHANGES=false` turns off the server's file watcher and its startup sync. Every Claude Code session starts its own server, and with the watcher on, all of them synced the same file at the same moment: the racing writers gave notes duplicate permalinks ending in `-1`, `-2` and failed each other's frontmatter writes. Indexing goes through `hooks/reindex_memory.py` instead (see Hooks), which runs one `basic-memory reindex` at a time on the whole machine.
 
 ## Components
 
@@ -130,11 +133,12 @@ Six observer skills. They **read** the conversation and **propose** captures, bu
 
 ### Hooks (`hooks/`)
 
-Five deterministic hooks bound to Claude Code lifecycle events.
+Six deterministic hooks bound to Claude Code lifecycle events.
 
 | Hook | Event | Purpose |
 |---|---|---|
 | `inject_memory_context.sh` → `.py` | `UserPromptSubmit` | Injects pinned memories (`always_inject: true`) + top semantic hits as context |
+| `reindex_memory.sh` → `.py` | `PostToolUse` (Write/Edit), `SessionStart` | Reindexes the project of a written memory file in the background; at session start, catches up every project. One reindex at a time machine-wide; changes arriving while one runs are folded into a single follow-up run |
 | `capture_observation.sh` → `.py` | `SessionEnd` | Writes one deterministic note per session into the observation buffer (Layer 3) |
 | `propose_checkpoint.sh` | `Stop` | Cross-platform notification suggesting `/pm-checkpoint` before `/clear` |
 | `block_dangerous_git.sh` | `PreToolUse` (Bash) | Blocks `--no-verify`, force-push on main, `--no-gpg-sign`, `Co-Authored-By` |
@@ -149,7 +153,7 @@ Ten universal `feedback`-type rule templates installed by `/pm-init` if the user
 ## Capture flow
 
 ```
-User intent → slash command → pm-memory-curator skill → typed fragment → MEMORY.md index updated → basic-memory auto-sync
+User intent → slash command → pm-memory-curator skill → typed fragment → MEMORY.md index updated → basic-memory reindex (PostToolUse hook)
 ```
 
 Three invariants:

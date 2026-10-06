@@ -44,13 +44,13 @@ metadata:
 
 6. **Update the index** `$CLAUDE_DIR/projects/<slug>/memory/MEMORY.md`: add a line in the appropriate section with `- [<slug>](<type>_<slug>.md) — <description>`.
 
-7. **Auto-register the project in basic-memory** (idempotent, best-effort). Needed so `/pm-recall` and semantic injection can see this project's memories. Run via Bash:
+7. **Auto-register and index the project in basic-memory** (idempotent, best-effort). Needed so `/pm-recall` and semantic injection can see this project's memories. Run via Bash:
    ```bash
    PROJECT_NAME=$(echo "<slug>" | sed 's/^-//' | tr '[:upper:]' '[:lower:]')
    basic-memory project add "$PROJECT_NAME" "<CLAUDE_DIR>/projects/<slug>/memory" 2>&1 | head -3 || true
-   basic-memory reindex --project "$PROJECT_NAME" 2>&1 | tail -2 || true
+   python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path "<CLAUDE_DIR>/projects/<slug>/memory"
    ```
-   Substitute `<slug>` with the slug from step 1 and `<CLAUDE_DIR>` with the resolved active config dir. `already exists` and `nested within existing project '<X>'` are both non-fatal. Do NOT rely on the background watcher: `basic-memory mcp` processes only watch projects that existed when they started, so a project registered afterwards is never indexed until a reindex — files stay pending and semantic search silently returns nothing. The reindex call is incremental and idempotent (near-instant when there is nothing new). Confirm with `basic-memory status --project "$PROJECT_NAME" 2>&1 | tail -5`: it must show `No changes`.
+   Substitute `<slug>` with the slug from step 1 and `<CLAUDE_DIR>` with the resolved active config dir. `already exists` and `nested within existing project '<X>'` are both non-fatal. basic-memory does not watch files (persistmind turns its watcher off): a hook reindexes a file's project after each Write or Edit, but only if the project was already registered, so a project registered after the Write must be indexed here. The script waits for any reindex already running, runs an incremental reindex and prints `basic-memory status`: it must show `No changes`. If the script path does not exist, run `basic-memory reindex --project "$PROJECT_NAME"` and `basic-memory status --project "$PROJECT_NAME"` instead.
 
 8. **Confirm to the user** in one line: "Memory saved: `<path>` (type: <type>, slug: <slug>)".
 

@@ -132,10 +132,11 @@ Interpret the result and pick the project name to use for the status check in 3f
 - Output contains `nested within existing project '<X>'` → another basic-memory project already covers this path. That is fine: the files are still indexed by `<X>`. Skip the dedicated project and use `<X>` for 3f. Report this as "covered by `<X>`", not as a failure.
 - `command not found` / not installed → warn, skip 3f, and continue (file-based memory still works; semantic search comes online when `basic-memory` is added later).
 
-**3f. Verify with basic-memory** (best-effort):
+**3f. Index and verify** (best-effort). The rule files copied in 3b were written before the project was registered, and basic-memory does not watch files, so index them now (`<plugin-root>` = the absolute path resolved in Step 0):
 ```bash
-basic-memory status --project "<project resolved in 3e>" 2>&1 | tail -5
+python3 "<plugin-root>/hooks/reindex_memory.py" --path ~/.claude/memory/persistmind
 ```
+The script reindexes the project resolved in 3e and prints its status, which must show `No changes`.
 
 **3g. Register the observation buffer (Layer 3)** (idempotent, best-effort):
 The `SessionEnd` hook writes one Markdown note per session to `$CLAUDE_DIR/observations/`, where `$CLAUDE_DIR` is the active Claude Code config dir (default `~/.claude`; multi-account setups like `claude-work` use `~/.claude-work`). Pre-create the directory and register its project so recall works before the first session ends:

@@ -170,7 +170,7 @@ Both are PreToolUse hooks — they fail loud with a message explaining what was 
 
 **Memories aren't being injected on prompts.** Check that hooks are enabled in `~/.claude/settings.json`. Run `basic-memory project list` to confirm your global project and current project are both registered.
 
-**`/pm-recall` finds nothing from a project that clearly has memories.** The project was likely registered after the MCP server started and was never indexed. Run `basic-memory reindex --project <name>`, then `basic-memory status --project <name>` must show `No changes`.
+**`/pm-recall` finds nothing from a project that clearly has memories.** The project was likely registered after its files were written, so no reindex picked them up. Run `basic-memory reindex --project <name>`, then `basic-memory status --project <name>` must show `No changes`. A file renamed with `mv` keeps its old modification time and the incremental reindex skips it: `basic-memory reindex --full --search --project <name>` rescans every file, then `basic-memory reindex --project <name>` adds the missing embeddings.
 
 **`/pm-init` keeps duplicating the CLAUDE.md block.** It shouldn't — the block is delimited and replaced in place. If it does, file a bug with the contents of your `~/.claude/CLAUDE.md`.
 

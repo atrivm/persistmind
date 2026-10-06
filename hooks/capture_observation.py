@@ -17,6 +17,8 @@ import glob
 import subprocess
 from datetime import datetime
 
+from reindex_memory import spawn_for_path
+
 BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
 # Multi-account aware: CLAUDE_CONFIG_DIR and BASIC_MEMORY_CONFIG_DIR are set by
 # wrapper aliases (e.g. `claude-work`) to isolate per-account state. Default to
@@ -70,6 +72,8 @@ def main():
         return
 
     ensure_project_registered()
+    # basic-memory does not watch files (see .mcp.json): index the note now.
+    spawn_for_path(out_path)
 
 
 def parse_transcript(path):

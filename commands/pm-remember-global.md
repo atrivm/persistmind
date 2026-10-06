@@ -46,7 +46,7 @@ metadata:
    - Feedback → `## Feedback (cross-project rules — distilled from projects)`
    - Reference → `## Reference`
 
-6. **Verify basic-memory pickup.** Run via Bash: `basic-memory status 2>&1 | tail -5` to confirm the new file is picked up by the auto-indexer.
+6. **Index and verify.** Run via Bash: `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path ~/.claude/memory/persistmind`. basic-memory does not watch files; the script reindexes the basic-memory project that covers the global layer (after any reindex already running) and prints its status, which must show `No changes`. If the script path does not exist, run `basic-memory reindex --project "${PM_GLOBAL_PROJECT:-persistmind-global}"` and `basic-memory status --project "${PM_GLOBAL_PROJECT:-persistmind-global}"` instead.
 
 7. **Confirm** in one line: "GLOBAL memory saved: `~/.claude/memory/persistmind/<file>` (type: <type>)".
 
