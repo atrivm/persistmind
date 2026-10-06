@@ -17,9 +17,11 @@ no other entity of the project (database) and no other file of the project
 
 Every touched project is then reindexed through hooks/reindex_memory.py and
 checked: `basic-memory status` must report no pending change, and each fixed
-file's entity must carry the restored permalink. Projects whose database
-disagrees with a file's frontmatter permalink (for instance a second
-basic-memory config that indexes the same folders) are reindexed too.
+file's entity must carry the restored permalink. Files whose database row
+disagrees with their frontmatter permalink (for instance in a second
+basic-memory config that indexes the same folders) are touched and their
+stored checksum is cleared, so the incremental reindex re-reads them; they are
+checked the same way.
 
 Dry run by default; --apply writes. Refuses to write while a basic-memory MCP
 server with its file watcher on is running, since it would race the fix.
@@ -90,6 +92,7 @@ class ProjectSurvey:
     fixes: list[Fix] = field(default_factory=list)
     skipped: list[str] = field(default_factory=list)
     db_mismatches: list[str] = field(default_factory=list)
+    mismatched: list[str] = field(default_factory=list)
     unreadable: list[str] = field(default_factory=list)
 
 
@@ -174,6 +177,7 @@ def survey(project: ProjectSurvey, db: sqlite3.Connection) -> None:
             continue
         if rel in db_permalinks and db_permalinks[rel] != permalink:
             project.db_mismatches.append(f'{rel}: file {permalink} / database {db_permalinks[rel]}')
+            project.mismatched.append(rel)
         stem = generate_permalink(Path(rel).name)
         last = permalink.rpartition('/')[2]
         m = re.fullmatch(re.escape(stem) + SUFFIX_RE, last)
@@ -327,9 +331,21 @@ def main() -> int:
             if f not in written:
                 print(f'    not rewritten (unexpected frontmatter layout): {f.rel}')
                 ok = False
+        # The incremental reindex re-reads a file only when its mtime moved and
+        # its checksum differs from the stored one, so a file whose database row
+        # disagrees but whose content nobody changed would stay stale. Touch it
+        # and clear the stored checksum (basic-memory's own "not synced yet").
+        if p.mismatched:
+            con = sqlite3.connect(BM_DB, timeout=10)
+            with con:
+                for rel in p.mismatched:
+                    os.utime(p.root / rel)
+                    con.execute('UPDATE entity SET checksum = NULL WHERE project_id = ? AND file_path = ?',
+                                (p.project_id, rel))
+            con.close()
         print(f'{p.name}: {len(written)} rewritten, reindexing...')
         ok = reindex_and_status(p) and ok
-        if written:
+        if written or p.mismatched:
             db = sqlite3.connect(f'file:{BM_DB}?mode=ro', uri=True)
             for f in written:
                 row = db.execute('SELECT permalink FROM entity WHERE project_id = ? AND file_path = ?',
@@ -337,6 +353,13 @@ def main() -> int:
                 on_disk, _ = frontmatter_permalink(p.root / f.rel)
                 if not row or row[0] != f.new or on_disk != f.new:
                     print(f'    NOT restored: {f.rel} (database {row[0] if row else None}, file {on_disk})')
+                    ok = False
+            for rel in p.mismatched:
+                row = db.execute('SELECT permalink FROM entity WHERE project_id = ? AND file_path = ?',
+                                 (p.project_id, rel)).fetchone()
+                on_disk, _ = frontmatter_permalink(p.root / rel)
+                if not row or row[0] != on_disk:
+                    print(f'    NOT realigned: {rel} (database {row[0] if row else None}, file {on_disk})')
                     ok = False
             db.close()
     print('Done.' if ok else 'Done with problems: see above.')
