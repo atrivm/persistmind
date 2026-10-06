@@ -8,7 +8,9 @@ writes. Memory files are indexed through this script instead:
 
   (no arguments)        PostToolUse hook for Write/Edit: when the file lies in
                         a registered basic-memory project, start a detached
-                        reindex of that project and return at once.
+                        reindex of that project and return at once. A memory
+                        whose frontmatter description YAML would misread is
+                        not indexed: Claude is told to quote it and save again.
   --all                 SessionStart hook: start a detached reindex of every
                         project, the catch-up each MCP server used to run at
                         startup (edits made outside Claude Code, other accounts).
@@ -28,6 +30,7 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import sqlite3
 import subprocess
 import sys
@@ -223,13 +226,65 @@ def run_foreground(paths: list[str]) -> int:
     return rc
 
 
+def description_problem(path: str) -> str | None:
+    """What YAML would misread in the description of the file's first
+    frontmatter block, or None. Unquoted, a ': ' makes the block invalid
+    (basic-memory then ignores it and prepends a block of its own) and a ' #'
+    starts a comment that cuts the text; a quote must close and escape its
+    inner quotes."""
+    if not path.endswith('.md'):
+        return None
+    try:
+        with open(path, encoding='utf-8') as fh:
+            lines = fh.read(65536).split('\n')
+    except (OSError, UnicodeDecodeError):
+        return None
+    if not lines or lines[0].strip() != '---':
+        return None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == '---':
+            return None
+        if not lines[i].startswith('description:'):
+            continue
+        value = lines[i][len('description:'):].strip()
+        for cont in lines[i + 1:]:
+            if not cont.startswith((' ', '\t')) or cont.strip() == '---':
+                break
+            value += ' ' + cont.strip()
+        if not value or value[0] in '|>':
+            return None
+        quote = value[0]
+        if quote == '"':
+            inner_ok = len(value) > 1 and value.endswith('"') and not re.search(r'(?<!\\)"', value[1:-1])
+            return None if inner_ok else 'a double quote that does not close it or is not escaped inside'
+        if quote == "'":
+            inner_ok = len(value) > 1 and value.endswith("'") and not re.search(r"(?<!')'(?!')", value[1:-1])
+            return None if inner_ok else 'a single quote that does not close it or is not doubled inside'
+        if ': ' in value or value.endswith(':'):
+            return 'an unquoted ": "'
+        if ' #' in value:
+            return 'an unquoted " #", where YAML would cut it'
+        return None
+    return None
+
+
 def run_hook() -> int:
-    """PostToolUse: never fails the tool call, whatever happens."""
+    """PostToolUse: exits 2 (feedback to Claude, the tool call already ran) only
+    for a memory file whose description YAML would misread; otherwise 0."""
     try:
         data = json.loads(sys.stdin.read())
         file_path = (data.get('tool_input') or {}).get('file_path') or ''
-        if file_path:
-            spawn_for_path(file_path)
+        name = project_for(file_path, load_projects()) if file_path else None
+        if name is None:
+            return 0
+        problem = description_problem(file_path)
+        if problem:
+            print(f'persistmind: the frontmatter description of {file_path} has {problem}. '
+                  'YAML would misread it, so the file was not indexed. Rewrite it as '
+                  'description: "..." (escape any " inside as \\") and save the file again.',
+                  file=sys.stderr)
+            return 2
+        spawn_background(name)
     except Exception:
         pass
     return 0
