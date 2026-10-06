@@ -4,6 +4,25 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-06
+
+### Fixed
+
+- **One process indexes memory files, however many sessions are open.** Every Claude Code session started its own `basic-memory mcp` server with the file watcher on, so ten sessions meant ten watchers syncing the same file in the same half second. The racing writers gave notes duplicate permalinks ending in `-1`/`-2` (written back into the frontmatter), failed each other's frontmatter writes (`Failed to write file`) and repeated the work dozens of times (`Slow file sync detected`). The plugin's MCP server now runs with `BASIC_MEMORY_SYNC_CHANGES=false` — no watcher, no startup sync — and indexing goes through `hooks/reindex_memory.py`: one `basic-memory reindex` at a time on the whole machine, shared by every session and every account of a multi-account setup. A change that arrives during a run queues one follow-up run; further changes fold into it.
+- **Files written right after a sync started are no longer lost on macOS.** basic-memory's incremental scan lists changed files with `find -newermt` cut to the second, and the macOS `find` compares whole seconds, so a file written in the same second as the previous sync's start (but after it) was never indexed. Before each run the reindex script moves the project's scan watermark back one second.
+- `pm-knowledge-recall` searches through the plugin's MCP server (`mcp__plugin_persistmind_basic-memory__search_notes`) instead of a separately registered basic-memory server.
+
+### Added
+
+- `PostToolUse` hook on Write/Edit: reindexes the project of a written memory file in the background, so a memory is searchable a few seconds after it is saved.
+- `SessionStart` hook: background catch-up reindex of every project, replacing the sync each MCP server ran at startup (edits made outside Claude Code, writes from another account).
+- `scripts/fix_suffixed_permalinks.py`: restores the permalinks the racing watchers suffixed with `-N`. It compares the last permalink segment with the file-name slug (slugs ending with a date stay untouched), changes a permalink only when no other file or entity of the project uses the shorter one, then reindexes and verifies. Dry run by default, `--apply` to write; refuses to write while a watcher covers the folders. Honors `BASIC_MEMORY_CONFIG_DIR` for a second account.
+
+### Changed
+
+- `/pm-remember`, `/pm-remember-global`, `/pm-checkpoint`, `/pm-forget`, `/pm-promote`, `/pm-init` and the `pm-memory-curator` skill index through `hooks/reindex_memory.py --path` and print `basic-memory status`, instead of waiting for the watcher. `/pm-promote` copies with `cp`: a file moved with `mv` keeps its old modification time and the incremental scan skips it.
+- The `SessionEnd` observation hook starts the reindex of the note it writes.
+
 ## [0.3.2] - 2026-09-25
 
 ### Fixed
