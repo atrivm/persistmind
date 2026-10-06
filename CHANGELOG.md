@@ -4,6 +4,15 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-10-06
+
+### Fixed
+
+- **Memory descriptions are written between double quotes.** The frontmatter templates of `/pm-remember`, `/pm-remember-global` and the `pm-memory-curator` skill showed an unquoted `description:`. A description containing `: ` was then invalid YAML: basic-memory ignored the whole frontmatter (name, description, type, tags) and prepended a block of its own, so the file ended up with two frontmatter blocks; an unquoted ` #` silently cut the description short. The templates now quote the description and say why. The `strict-type-safety` rule template and the `pm-memory-audit` skill's own frontmatter are quoted too.
+- **The reindex hook stops broken descriptions from any writer.** Memory files are also written outside the persistmind commands (Claude Code's own memory instructions, manual edits). After a Write or Edit of a memory file whose description YAML would misread (an unquoted `: ` or ` #`, a quote that does not close or is not escaped inside), the `PostToolUse` hook does not index it and tells Claude to quote the description and save again; the next save is indexed as usual.
+- Memories saved before this release may already have two frontmatter blocks; the upgrade does not change them. To repair one: quote the description in the original (second) block, move the `permalink` up from the first block, delete the first block, then reindex the project.
+- `scripts/fix_suffixed_permalinks.py` realigns database rows whose permalink disagrees with an unchanged file. The incremental reindex re-reads a file only when its modification time and checksum change, so such rows stayed stale while the script reported success; it now touches those files, clears the stored checksum and checks each row after the reindex.
+
 ## [0.4.0] - 2026-10-06
 
 ### Fixed

@@ -2,7 +2,7 @@
 
 > Persistent memory framework for Claude Code. Your AI companion remembers who you are, what you decided, and why — across sessions, projects, and time.
 
-**Status:** v0.4.0 — one process indexes memory files however many sessions are open: basic-memory's per-session file watchers are off, and a single locked reindex runs after each write.
+**Status:** v0.4.1 — memory descriptions are written between double quotes, and the reindex hook refuses a memory whose description YAML would misread, so basic-memory always reads the whole frontmatter.
 
 ## What it does
 
@@ -131,4 +131,4 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Status
 
-v0.4.0. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
+v0.4.1. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
