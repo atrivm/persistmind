@@ -31,7 +31,7 @@ Recognize the equivalent phrases in the user's working language.
 
 2. **Primary semantic search.** Via the basic-memory MCP tool:
    ```
-   mcp__basic-memory__search_notes(query="<keywords>", limit=10)
+   mcp__plugin_persistmind_basic-memory__search_notes(query="<keywords>", limit=10)
    ```
    If unavailable, fall back via Bash:
    ```bash
