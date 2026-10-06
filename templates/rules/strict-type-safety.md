@@ -1,6 +1,6 @@
 ---
 name: strict-type-safety
-description: TypeScript strict and Python type hints are mandatory — no any / @ts-ignore / # type: ignore without justification
+description: "TypeScript strict and Python type hints are mandatory — no any / @ts-ignore / # type: ignore without justification"
 type: feedback
 tags:
   - type-safety

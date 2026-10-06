@@ -53,7 +53,7 @@ Every memory is a Markdown file with YAML frontmatter. The frontmatter is a cont
 ```yaml
 ---
 name: kebab-case-slug
-description: One-line summary used for relevance ranking
+description: "One-line summary used for relevance ranking"
 metadata:
   type: user | feedback | project | decision | pivot | reference
   created: YYYY-MM-DD
@@ -61,6 +61,8 @@ metadata:
   always_inject: false   # opt-in; true means "inject on every prompt"
 ---
 ```
+
+The description stays between double quotes: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter and prepends a block of its own) and a ` #` cuts it short.
 
 ### Types and body shapes
 

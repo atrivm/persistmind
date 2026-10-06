@@ -72,7 +72,7 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
    ```yaml
    ---
    name: <slug>
-   description: <description>
+   description: "<description>"
    metadata:
      type: <type>
      created: <YYYY-MM-DD>
@@ -81,6 +81,7 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
 
    <body>
    ```
+   Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter) and a ` #` cuts it short.
 
 8. **Show the fragment to the user** BEFORE saving. Ask for confirmation.
 

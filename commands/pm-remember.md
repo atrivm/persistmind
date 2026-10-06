@@ -26,13 +26,14 @@ Save the following information as a memory fragment in the current project.
 ```yaml
 ---
 name: <kebab-slug>
-description: <one line, specific>
+description: "<one line, specific>"
 metadata:
   type: <type>
   created: <YYYY-MM-DD from `date '+%Y-%m-%d'`>
   tags: [<2-4 relevant tags>]
 ---
 ```
+Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter) and a ` #` cuts it short.
 
 4. **Generate the body** based on type:
    - `feedback`/`project`: the rule/fact, then `**Why:**`, then `**How to apply:**`.

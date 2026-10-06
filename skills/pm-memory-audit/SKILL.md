@@ -1,6 +1,6 @@
 ---
 name: pm-memory-audit
-description: When the user wants to review, clean up, deduplicate, or audit the persistent memory system — phrases like "clean up memory", "audit memories", "stale memories", "duplicate memories", "review global memory", "review project memory", "any contradictions?", "check memory". Runs structural checks on the memory store: stale entries (no recall in 6 months), duplicates (cosine similarity > 0.92), orphans (no incoming/outgoing links), conflicts (contradictory rules).
+description: 'When the user wants to review, clean up, deduplicate, or audit the persistent memory system — phrases like "clean up memory", "audit memories", "stale memories", "duplicate memories", "review global memory", "review project memory", "any contradictions?", "check memory". Runs structural checks on the memory store: stale entries (no recall in 6 months), duplicates (cosine similarity > 0.92), orphans (no incoming/outgoing links), conflicts (contradictory rules).'
 metadata:
   version: 1.0.0
 ---

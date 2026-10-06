@@ -26,13 +26,14 @@ If in doubt: PROJECT. You can always `/pm-promote` later when it becomes clear i
 ```yaml
 ---
 name: <kebab-slug>
-description: <one line, specific>
+description: "<one line, specific>"
 metadata:
   type: <type>
   created: <YYYY-MM-DD>
   tags: [<2-4 tags>]
 ---
 ```
+Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter) and a ` #` cuts it short.
 
 3. **Generate the body:**
    - `feedback`: the rule, **Why:**, **How to apply:**.
