@@ -2,7 +2,7 @@
 
 > Persistent memory framework for Claude Code. Your AI companion remembers who you are, what you decided, and why — across sessions, projects, and time.
 
-**Status:** v0.4.1 — memory descriptions are written between double quotes, and the reindex hook refuses a memory whose description YAML would misread, so basic-memory always reads the whole frontmatter.
+**Status:** v0.5.0 — pinned rules load whole through Claude Code's own `~/.claude/rules/`, and the per-prompt injection hook is gone, so prompts no longer wait for a semantic search.
 
 ## What it does
 
@@ -130,4 +130,4 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Status
 
-v0.4.1. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
+v0.5.0. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
