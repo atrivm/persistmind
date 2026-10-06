@@ -4,6 +4,16 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+
+- **The `UserPromptSubmit` injection hook.** Claude Code saves hook output above 10,000 characters to a file and puts only its first 2,000 characters in context. With seven pinned rules the injection weighed about 15 KB, so from September the model saw only the start of the first pinned rule: the other pinned rules and every semantic hit, printed last, were cut (99% of prompts in October). The hook also held every prompt for about 4 s of semantic search.
+
+### Changed
+
+- **Pinned rules load through Claude Code's own `~/.claude/rules/`.** Link a global fragment into that folder (`ln -s`) and Claude Code loads it whole at every session start; the fragment stays the single source. `always_inject: true` is no longer read. To migrate, link each fragment that has it.
+
 ## [0.4.1] - 2026-10-06
 
 ### Fixed

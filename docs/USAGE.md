@@ -83,12 +83,24 @@ The `propose_checkpoint.sh` hook fires on every `Stop` event with a desktop noti
 
 ### Automatic recall
 
-You don't need to do anything to read pinned memories or relevant context. The `inject_memory_context.py` hook runs on every prompt and adds:
+You don't need to do anything. At every session start Claude Code itself loads:
 
-- **Pinned memories** — fragments with `always_inject: true` in frontmatter. These are loaded every turn.
-- **Semantic hits** — basic-memory searches the global layer and the current project's layer against your prompt and injects the top matches.
+- **Pinned rules** — every fragment linked into `~/.claude/rules/`, whole.
+- **The project index** — the current project's `MEMORY.md` (Claude Code's auto memory). Claude reads the fragments it lists when it needs them.
 
-You'll see them as a `## Auto-injected memories` block above your prompt in the model's context (visible if you inspect the conversation, not in your typed input).
+Everything else stays on disk until you or Claude search for it.
+
+### Pinning a rule
+
+Link the fragment into Claude Code's user rules folder:
+
+```bash
+ln -s ~/.claude/memory/persistmind/feedback_<slug>.md ~/.claude/rules/
+```
+
+New sessions load it whole. Edit the fragment itself, not the link; remove the link to unpin. With a second account, link its rules folder to the first once: `ln -s ~/.claude/rules ~/.claude-work/rules`.
+
+Keep pinned rules few and short: they take context in every session.
 
 ### Explicit recall
 
@@ -168,7 +180,7 @@ Both are PreToolUse hooks — they fail loud with a message explaining what was 
 
 **`basic-memory: command not found`** — install it (`pipx install basic-memory`) or set `PM_BASIC_MEMORY_BIN` to its full path.
 
-**Memories aren't being injected on prompts.** Check that hooks are enabled in `~/.claude/settings.json`. Run `basic-memory project list` to confirm your global project and current project are both registered.
+**A pinned rule isn't in the session.** `ls -l ~/.claude/rules/` must show its link, pointing to an existing file. Rules load at session start, so a new link reaches new sessions only. `/context` lists the rules files a session loaded.
 
 **`/pm-recall` finds nothing from a project that clearly has memories.** The project was likely registered after its files were written, so no reindex picked them up. Run `basic-memory reindex --project <name>`, then `basic-memory status --project <name>` must show `No changes`. A file renamed with `mv` keeps its old modification time and the incremental reindex skips it: `basic-memory reindex --full --search --project <name>` rescans every file, then `basic-memory reindex --project <name>` adds the missing embeddings.
 

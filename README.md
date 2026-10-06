@@ -10,7 +10,7 @@ persistmind is a Claude Code plugin that turns Claude into a long-term collabora
 
 - **Captures** facts, decisions, pivots, and feedback as you work, via slash commands or observer skills.
 - **Stores** them as typed Markdown fragments — human-readable, grep-able, versionable.
-- **Recalls** them automatically at the start of every prompt (hooks inject relevant context) and on-demand (semantic search via [basic-memory](https://memory.basicmachines.co/)).
+- **Recalls** them at every session start (pinned rules linked into `~/.claude/rules/`, the project's `MEMORY.md` index) and on demand (semantic search via [basic-memory](https://memory.basicmachines.co/)).
 - **Organizes** them in three layers: user-global, per-project, observation buffer.
 
 No vendor lock-in. No black-box vectors. Memory is plain files you own.
@@ -101,9 +101,8 @@ Six skills watch the conversation and propose captures when relevant — nothing
 
 ## Safety hooks
 
-Six deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
+Five deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
 
-- **Memory injection** on every prompt (pinned rules + semantic hits).
 - **Memory reindex** after each Write/Edit of a memory file and at session start, one run at a time (basic-memory's own file watcher is turned off, see `docs/ARCHITECTURE.md`).
 - **Observation capture** on session end (one note per session into the observation buffer).
 - **Checkpoint reminder** on session stop (cross-platform notification).

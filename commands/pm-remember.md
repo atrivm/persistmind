@@ -45,7 +45,7 @@ Always write the description between double quotes, escaping any `"` inside it a
 
 6. **Update the index** `$CLAUDE_DIR/projects/<slug>/memory/MEMORY.md`: add a line in the appropriate section with `- [<slug>](<type>_<slug>.md) — <description>`.
 
-7. **Auto-register and index the project in basic-memory** (idempotent, best-effort). Needed so `/pm-recall` and semantic injection can see this project's memories. Run via Bash:
+7. **Auto-register and index the project in basic-memory** (idempotent, best-effort). Needed so `/pm-recall` can see this project's memories. Run via Bash:
    ```bash
    PROJECT_NAME=$(echo "<slug>" | sed 's/^-//' | tr '[:upper:]' '[:lower:]')
    basic-memory project add "$PROJECT_NAME" "<CLAUDE_DIR>/projects/<slug>/memory" 2>&1 | head -3 || true

@@ -12,7 +12,7 @@ persistmind treats long-term memory as a **layered store of typed Markdown fragm
 | **Project** | `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` | Decisions, pivots, constraints scoped to one codebase |
 | **Observation buffer** | `${CLAUDE_CONFIG_DIR:-~/.claude}/observations/` | One auto-captured note per session — searchable, never auto-injected |
 
-Each layer is a directory of `.md` files. The top of each layer has a `MEMORY.md` index that the Claude Code harness always loads. Fragment files are loaded on demand (by the user, by hooks, or via semantic search).
+Each layer is a directory of `.md` files with a `MEMORY.md` index at the top. Claude Code loads the current project's index at every session start (its auto memory), and loads whole the global fragments linked into `~/.claude/rules/` (pinned rules). Everything else is read on demand (by the user, by Claude, or via semantic search).
 
 The split exists so that a rule learned in one project (e.g. "never `--no-verify`") can live globally and apply everywhere, while a rule specific to one codebase (e.g. "migrations must be reversible") stays in that project's scope.
 
@@ -21,9 +21,10 @@ The split exists so that a rule learned in one project (e.g. "never `--no-verify
 ```
 ~/.claude/
 ├── CLAUDE.md                          # User global instructions (persistmind manages a delimited block)
+├── rules/                             # Pinned rules: links to global fragments, loaded whole at session start
 ├── memory/
 │   └── persistmind/                   # User global memory layer
-│       ├── MEMORY.md                  # Index (always loaded)
+│       ├── MEMORY.md                  # Index (read on demand)
 │       └── *.md                       # Typed fragments (loaded on demand)
 ├── projects/
 │   └── <project-slug>/
@@ -42,7 +43,7 @@ The split exists so that a rule learned in one project (e.g. "never `--no-verify
 
 The `SessionEnd` hook (`hooks/capture_observation.sh`) writes one Markdown note per session into `~/.claude/observations/<project-slug>/`. It is **deterministic**: it parses the session transcript and records what is already there — the user prompts, a per-tool usage count, and the files touched (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`). No LLM runs in the hook; intelligent distillation stays the job of `/pm-checkpoint`.
 
-These notes are registered as the `persistmind-observations` basic-memory project, so `/pm-recall` searches them alongside the curated layers. They are deliberately **excluded** from prompt-time injection (the `UserPromptSubmit` hook skips this project) and from the always-loaded indexes — the buffer is queried on demand, not pushed into every prompt. Sessions with no real user prompts are skipped to avoid noise.
+These notes are registered as the `persistmind-observations` basic-memory project, so `/pm-recall` searches them alongside the curated layers. They are never loaded automatically — the buffer is queried on demand, not pushed into every session. Sessions with no real user prompts are skipped to avoid noise.
 
 ## Memory format
 
@@ -58,11 +59,16 @@ metadata:
   type: user | feedback | project | decision | pivot | reference
   created: YYYY-MM-DD
   tags: [optional, list]
-  always_inject: false   # opt-in; true means "inject on every prompt"
 ---
 ```
 
 The description stays between double quotes: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter and prepends a block of its own) and a ` #` cuts it short.
+
+### Pinned rules
+
+A rule that must reach every session is linked into Claude Code's user rules folder: `ln -s ~/.claude/memory/persistmind/<file>.md ~/.claude/rules/`. Claude Code loads each rule file whole at session start and drops its frontmatter, so the fragment stays the single source and basic-memory keeps indexing it.
+
+Up to 0.4.1 a `UserPromptSubmit` hook injected fragments marked `always_inject: true` on every prompt. Claude Code saves hook output above 10,000 characters to a file and puts only its first 2,000 characters in context, so past a few pinned rules the model saw only the start of the first one. The flag is no longer read.
 
 ### Types and body shapes
 
@@ -135,11 +141,10 @@ Six observer skills. They **read** the conversation and **propose** captures, bu
 
 ### Hooks (`hooks/`)
 
-Six deterministic hooks bound to Claude Code lifecycle events.
+Five deterministic hooks bound to Claude Code lifecycle events.
 
 | Hook | Event | Purpose |
 |---|---|---|
-| `inject_memory_context.sh` → `.py` | `UserPromptSubmit` | Injects pinned memories (`always_inject: true`) + top semantic hits as context |
 | `reindex_memory.sh` → `.py` | `PostToolUse` (Write/Edit), `SessionStart` | Reindexes the project of a written memory file in the background; at session start, catches up every project. One reindex at a time machine-wide; changes arriving while one runs are folded into a single follow-up run |
 | `capture_observation.sh` → `.py` | `SessionEnd` | Writes one deterministic note per session into the observation buffer (Layer 3) |
 | `propose_checkpoint.sh` | `Stop` | Cross-platform notification suggesting `/pm-checkpoint` before `/clear` |
@@ -168,10 +173,7 @@ Three invariants:
 
 Two paths:
 
-**Automatic, every prompt.** `UserPromptSubmit` hook runs `inject_memory_context.py`, which:
-1. Loads all fragments with `always_inject: true` (pinned rules).
-2. Runs a basic-memory semantic search against the user's prompt across the global layer and the current project's layer.
-3. Injects the top hits as a `## Auto-injected memories` block above the user prompt.
+**Automatic, at session start.** Claude Code itself loads the pinned rules (`~/.claude/rules/`) and the current project's `MEMORY.md` index; Claude reads the fragments the index lists when it needs them. persistmind adds no hook to this path.
 
 **On-demand, explicit.** `/pm-recall <topic>` runs a cross-project semantic search (every registered basic-memory project) and surfaces the top-ranked hits with scope and excerpt.
 

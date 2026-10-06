@@ -1,17 +1,6 @@
 {
   "description": "persistmind memory and safety hooks",
   "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/inject_memory_context.sh",
-            "timeout": 15
-          }
-        ]
-      }
-    ],
     "SessionEnd": [
       {
         "hooks": [
