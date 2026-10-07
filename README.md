@@ -2,7 +2,7 @@
 
 > Persistent memory framework for Claude Code. Your AI companion remembers who you are, what you decided, and why — across sessions, projects, and time.
 
-**Status:** v0.6.0 — no basic-memory, no MCP server, no index: recall is a word search over the memory files and the observation buffer (`scripts/recall.sh`).
+**Status:** v0.6.1 — the word search (`scripts/recall.sh`) also finds observation folders shared between two accounts; no basic-memory, no MCP server, no index.
 
 ## What it does
 
@@ -116,4 +116,4 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Status
 
-v0.6.0. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
+v0.6.1. Pre-1.0, so breaking changes are possible between minor versions until 1.0.
