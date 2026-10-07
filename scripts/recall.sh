@@ -16,9 +16,10 @@ shift
 claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 obs_dir="${PM_OBSERVATIONS_ROOT:-$claude_dir/observations}"
 obs_dir="${obs_dir/#\~/$HOME}"
-set -- "$HOME/.claude/memory" "$obs_dir" "$claude_dir"/projects/*/memory "$@"
+set -- "$HOME/.claude/memory" "$obs_dir"/* "$claude_dir"/projects/*/memory "$@"
 
-# Resolve each root to its real path: BSD grep -R does not follow symlinks.
+# Resolve each root to its real path: BSD grep -R does not follow symlinks, and
+# a folder shared between accounts is a symlink (one root per observation folder).
 roots=()
 for dir in "$@"; do
   [ -d "$dir" ] && roots+=("$(cd "$dir" && pwd -P)")

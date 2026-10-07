@@ -85,7 +85,11 @@ Link the fragment into Claude Code's user rules folder:
 ln -s ~/.claude/memory/persistmind/feedback_<slug>.md ~/.claude/rules/
 ```
 
-New sessions load it whole. Edit the fragment itself, not the link; remove the link to unpin. With a second account, link its rules folder to the first once: `ln -s ~/.claude/rules ~/.claude-work/rules`.
+New sessions load it whole. Edit the fragment itself, not the link; remove the link to unpin. A second account (`CLAUDE_CONFIG_DIR`) reads its own `rules` folder: link there only the rules it should see. A rule that carries personal details does not belong in a work account, whose sessions the employer may be able to export.
+
+### Sharing a project between two accounts
+
+Each account keeps its project memories and observation buffer under its own config dir. For a project you work on from both, move the second account's fragments into the first account's `projects/<slug>/memory/` (merge the `MEMORY.md` lines), then replace the second account's folder with a link to it; do the same for each `observations/<slug>*` folder. Both accounts then read and write the same memory, and `/pm-recall` follows the links.
 
 Keep pinned rules few and short: they take context in every session.
 
