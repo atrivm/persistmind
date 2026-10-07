@@ -6,27 +6,19 @@ ONE compact Markdown note summarizing the session into the observations store.
 
 Deterministic only: it extracts what the transcript already contains (user
 prompts, tools used, files touched). No LLM call — intelligent distillation
-stays the job of /pm-checkpoint. The note is plain Markdown indexed by
-basic-memory and reachable via /pm-recall; it is never auto-injected.
+stays the job of /pm-checkpoint. The note is plain Markdown reachable via
+/pm-recall; it is never auto-injected.
 """
 import json
 import os
 import re
 import sys
 import glob
-import subprocess
 from datetime import datetime
 
-from reindex_memory import spawn_for_path
-
-BM = os.environ.get('PM_BASIC_MEMORY_BIN', 'basic-memory')
-# Multi-account aware: CLAUDE_CONFIG_DIR and BASIC_MEMORY_CONFIG_DIR are set by
-# wrapper aliases (e.g. `claude-work`) to isolate per-account state. Default to
-# `~/.claude` and `~/.basic-memory` when unset.
+# Multi-account aware: CLAUDE_CONFIG_DIR is set by wrapper aliases (e.g.
+# `claude-work`) to isolate per-account state. Defaults to `~/.claude`.
 CLAUDE_DIR = os.path.expanduser(os.environ.get('CLAUDE_CONFIG_DIR') or '~/.claude')
-BM_CONFIG_DIR = os.path.expanduser(os.environ.get('BASIC_MEMORY_CONFIG_DIR') or '~/.basic-memory')
-BM_CONFIG = os.path.join(BM_CONFIG_DIR, 'config.json')
-OBS_PROJECT = os.environ.get('PM_OBSERVATIONS_PROJECT', 'persistmind-observations')
 _obs_override = os.environ.get('PM_OBSERVATIONS_ROOT')
 OBS_ROOT = os.path.expanduser(_obs_override) if _obs_override else os.path.join(CLAUDE_DIR, 'observations')
 
@@ -70,10 +62,6 @@ def main():
             fh.write(note)
     except Exception:
         return
-
-    ensure_project_registered()
-    # basic-memory does not watch files (see .mcp.json): index the note now.
-    spawn_for_path(out_path)
 
 
 def parse_transcript(path):
@@ -184,28 +172,6 @@ def render_note(slug, cwd, session_id, end_reason,
         body += [f'- {f}' for f in files]
     body.append('')
     return '\n'.join(fm + body)
-
-
-def ensure_project_registered():
-    """Best-effort: register the observations project so it is searchable.
-
-    Files are the source of truth and are written regardless; this only wires
-    semantic indexing. Silent on any failure.
-    """
-    try:
-        with open(BM_CONFIG) as f:
-            cfg = json.load(f)
-        if OBS_PROJECT in cfg.get('projects', {}):
-            return
-    except Exception:
-        pass
-    try:
-        subprocess.run(
-            [BM, 'project', 'add', OBS_PROJECT, OBS_ROOT],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15
-        )
-    except Exception:
-        pass
 
 
 if __name__ == '__main__':

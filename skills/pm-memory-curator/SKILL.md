@@ -21,7 +21,7 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
    - kebab-case
    - 2-5 meaningful words
    - No filler articles/prepositions
-   - Unique vs. existing memories (check with `basic-memory tool search-notes "<slug>"`)
+   - Unique vs. existing memories (check with `"${CLAUDE_PLUGIN_ROOT}/scripts/recall.sh" '<slug words>'`)
 
 4. **Write the `description`.**
    - One line, max 100 characters
@@ -81,7 +81,7 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
 
    <body>
    ```
-   Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter) and a ` #` cuts it short.
+   Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid and a ` #` cuts it short.
 
 8. **Show the fragment to the user** BEFORE saving. Ask for confirmation.
 
@@ -90,8 +90,6 @@ Help the user turn a free-form observation into a well-formed memory fragment, c
    - `$CLAUDE_DIR/projects/<project-slug>/memory/<type>_<slug>.md` for project (active account)
 
 10. **Update the corresponding MEMORY.md index.**
-
-11. **Index and verify** via `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path <saved file>`: basic-memory does not watch files, so the script reindexes the file's project and prints its status, which must show `No changes`. If the script path does not exist, run `basic-memory reindex --project <name>` and `basic-memory status --project <name>` instead.
 
 ## Constraints
 

@@ -30,14 +30,12 @@ Promote the memory `$ARGUMENTS` from the current project to the global User laye
    Use AskUserQuestion: "Promote to global?" — options: Yes (move) / Yes (copy, keep in project too) / No (cancel).
 
 5. **Execute the promotion:**
-   - **Move**: copy the file to `~/.claude/memory/persistmind/<type>_<slug>.md` (with `cp` or Write, never `mv`: a moved file keeps its old modification time and the incremental reindex in step 7 does not see it), delete the original, update MEMORY.md in both layers.
+   - **Move**: move the file to `~/.claude/memory/persistmind/<type>_<slug>.md`, update MEMORY.md in both layers.
    - **Copy**: copy the file into global, leave the original, update both indices.
 
 6. **Update the global file's frontmatter** if needed: `tags` may gain `[global, promoted-from-<slug>]`.
 
-7. **Index and verify**: `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path <global file> --path <project file>`. basic-memory does not watch files; the script reindexes both projects and prints their status, which must show `No changes`. If the script path does not exist, run `basic-memory reindex` and `basic-memory status --project <name>` for both projects instead.
-
-8. **Confirm** in one line.
+7. **Confirm** in one line.
 
 ## When to use
 - A rule you applied to project X turns out to be useful for Y and Z too → promote it.

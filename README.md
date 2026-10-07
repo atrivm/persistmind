@@ -10,7 +10,7 @@ persistmind is a Claude Code plugin that turns Claude into a long-term collabora
 
 - **Captures** facts, decisions, pivots, and feedback as you work, via slash commands or observer skills.
 - **Stores** them as typed Markdown fragments — human-readable, grep-able, versionable.
-- **Recalls** them at every session start (pinned rules linked into `~/.claude/rules/`, the project's `MEMORY.md` index) and on demand (semantic search via [basic-memory](https://memory.basicmachines.co/)).
+- **Recalls** them at every session start (pinned rules linked into `~/.claude/rules/`, the project's `MEMORY.md` index) and on demand (a word search across every layer, `/pm-recall`).
 - **Organizes** them in three layers: user-global, per-project, observation buffer.
 
 No vendor lock-in. No black-box vectors. Memory is plain files you own.
@@ -23,7 +23,7 @@ Three layers:
 2. **Project** — `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` — decisions, pivots, constraints for the current codebase (per-account in multi-account setups, e.g. `~/.claude-work/projects/...` for a `claude-work` wrapper alias).
 3. **Observation buffer** — `~/.claude/observations/` — one auto-captured note per session (prompts, tools, files touched), searchable via `/pm-recall`, never auto-injected.
 
-Backbone: [basic-memory](https://github.com/basicmachines-co/basic-memory) MCP server, declared in the plugin's `.mcp.json` and assumed to be on `$PATH`. basic-memory is a separate AGPL-3.0 dependency, installed independently — persistmind does not bundle or modify it.
+No database and no background service: the memory is the Markdown files, and recall searches them by words.
 
 For the full model — storage layout, fragment format, manifest, capture/recall flows — see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
@@ -40,20 +40,7 @@ Add the marketplace, install the plugin, then run the setup wizard:
 ### Prerequisites
 
 - Claude Code installed.
-- `basic-memory` on `$PATH` — install with `pipx install basic-memory` (recommended) or `pip install basic-memory`.
 - macOS or Linux. Windows is not supported.
-
-### Verify
-
-```bash
-basic-memory --version
-```
-
-If `basic-memory` lives outside `$PATH`, point persistmind at it:
-
-```bash
-export PM_BASIC_MEMORY_BIN=/full/path/to/basic-memory
-```
 
 ## Quick start
 
@@ -83,7 +70,7 @@ For the full workflow guide, see [docs/USAGE.md](./docs/USAGE.md).
 | `/pm-remember "..."` | Capture a fact in the current project |
 | `/pm-remember-global "..."` | Capture a rule globally (all projects) |
 | `/pm-checkpoint` | End-of-session: propose what to save before `/clear` |
-| `/pm-recall <topic>` | Semantic search across every memory layer |
+| `/pm-recall <topic>` | Word search across every memory layer |
 | `/pm-promote <name>` | Promote a project memory to global |
 | `/pm-distill` | Reduce a long conversation to consolidated facts (read-only) |
 | `/pm-forget <name>` | Remove a memory after confirmation (backed up first) |
@@ -94,16 +81,15 @@ Six skills watch the conversation and propose captures when relevant — nothing
 
 - **`pm-memory-curator`** — drafts free-form input into typed fragments
 - **`pm-session-onboarding`** — produces a brief from memory at session start
-- **`pm-knowledge-recall`** — answers "did we already…?" with semantic search
+- **`pm-knowledge-recall`** — answers "did we already…?" by searching the memory files
 - **`pm-decision-logger`** — proposes `decision` memories when you settle a choice
 - **`pm-pivot-detector`** — proposes `pivot` memories when direction changes
 - **`pm-memory-audit`** — checks for stale entries, duplicates, orphans, conflicts
 
 ## Safety hooks
 
-Five deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
+Four deterministic hooks bind to Claude Code lifecycle events (wired in `hooks/hooks.json`):
 
-- **Memory reindex** after each Write/Edit of a memory file and at session start, one run at a time (basic-memory's own file watcher is turned off, see `docs/ARCHITECTURE.md`).
 - **Observation capture** on session end (one note per session into the observation buffer).
 - **Checkpoint reminder** on session stop (cross-platform notification).
 - **Git safety**: blocks `Co-Authored-By`, `--no-verify`, force-push on `main`, `--no-gpg-sign`.

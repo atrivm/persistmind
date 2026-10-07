@@ -5,20 +5,7 @@ This document walks through the typical workflows: setting up, capturing memory 
 ## Prerequisites
 
 - Claude Code installed and configured.
-- [basic-memory](https://memory.basicmachines.co/) on `$PATH` (`pipx install basic-memory` is the easiest path).
 - macOS or Linux.
-
-Verify:
-
-```bash
-basic-memory --version
-```
-
-If `basic-memory` is installed somewhere not on `$PATH`, point persistmind at it:
-
-```bash
-export PM_BASIC_MEMORY_BIN=/full/path/to/basic-memory
-```
 
 ## First-time setup
 
@@ -110,7 +97,7 @@ When you want to search yourself:
 /pm-recall webhook retry
 ```
 
-This runs across **every** registered basic-memory project (not just global + current), so you can find work from another codebase. Top 10 hits ranked by score, each with scope, excerpt, and a link to the full fragment.
+It searches by words — several at once, synonyms and both languages — across the global layer, **every** project memory of the active account and the observation buffer, so you can find work from another codebase or the day something happened. Claude reads the best matches and shows up to 10, each with its scope.
 
 The `pm-knowledge-recall` skill triggers on the same intent expressed in natural language ("did we already solve this?", "remember when we tried X?") — it runs the same search and presents results conversationally.
 
@@ -124,7 +111,7 @@ When a rule you originally saved in one project turns out to apply everywhere:
 /pm-promote migrations-must-be-reversible
 ```
 
-The command moves the fragment from the project layer to `~/.claude/memory/persistmind/`, updates both `MEMORY.md` indices, and resyncs basic-memory.
+The command moves the fragment from the project layer to `~/.claude/memory/persistmind/`, and updates both `MEMORY.md` indices.
 
 ### Distill a long conversation
 
@@ -163,7 +150,7 @@ It proposes actions but executes nothing without confirmation.
 
 Each Claude Code project gets its own memory directory under `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` — i.e. under the active Claude Code config dir, so multi-account wrappers (e.g. `claude-work`) get isolated project memories automatically. When you open a new project, the corresponding layer is loaded automatically alongside the global layer.
 
-basic-memory tracks each project as a separate indexed collection. Cross-project search (`/pm-recall`) walks them all. The global layer is itself a basic-memory project (default name `persistmind-global`, override via `PM_GLOBAL_PROJECT`).
+Cross-project search (`/pm-recall`) walks every project memory folder of the active account.
 
 When starting a fresh session inside an existing project, the `pm-session-onboarding` skill produces a brief from memory: current state, recent decisions, applicable global rules, open TODOs, last checkpoint date. Triggered by an empty-handed session start or by phrases like "where did we leave off?".
 
@@ -178,11 +165,9 @@ Both are PreToolUse hooks — they fail loud with a message explaining what was 
 
 ## Troubleshooting
 
-**`basic-memory: command not found`** — install it (`pipx install basic-memory`) or set `PM_BASIC_MEMORY_BIN` to its full path.
-
 **A pinned rule isn't in the session.** `ls -l ~/.claude/rules/` must show its link, pointing to an existing file. Rules load at session start, so a new link reaches new sessions only. `/context` lists the rules files a session loaded.
 
-**`/pm-recall` finds nothing from a project that clearly has memories.** The project was likely registered after its files were written, so no reindex picked them up. Run `basic-memory reindex --project <name>`, then `basic-memory status --project <name>` must show `No changes`. A file renamed with `mv` keeps its old modification time and the incremental reindex skips it: `basic-memory reindex --full --search --project <name>` rescans every file, then `basic-memory reindex --project <name>` adds the missing embeddings.
+**`/pm-recall` finds nothing on a topic that clearly has memories.** The words did not match: ask again with other words (a synonym, the other language, the name of a file or a tool). Memories kept outside the standard folders are searched only when passed to `scripts/recall.sh` as extra folders, for example by listing them in your `CLAUDE.md`.
 
 **`/pm-init` keeps duplicating the CLAUDE.md block.** It shouldn't — the block is delimited and replaced in place. If it does, file a bug with the contents of your `~/.claude/CLAUDE.md`.
 

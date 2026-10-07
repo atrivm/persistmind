@@ -30,7 +30,6 @@ Remove the memory `$ARGUMENTS`.
    - Backup first: `cp <file> ~/.claude/backups/forgotten_<timestamp>_<slug>.md`
    - Remove the file: `rm <file>`
    - Remove the line from the MEMORY.md index (global or project).
-   - Reindex the memory's basic-memory project: `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path <removed file path>` (basic-memory does not watch files, so the deletion is only seen by a reindex; the printed status must show `No changes`). If the script path does not exist, run `basic-memory reindex 2>&1 | tail -5` instead.
 
 6. **Final confirmation** in one line: "Removed: `<path>` (backup at `<backup-path>`)".
 

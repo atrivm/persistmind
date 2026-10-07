@@ -1,68 +1,34 @@
 ---
-description: Semantic search across all memories (global + every project)
-argument-hint: "<natural-language query>"
+description: Search every memory layer by words (global, projects, observation buffer)
+argument-hint: "<topic or question>"
 ---
 
-# /pm-recall — Cross-project semantic search
+# /pm-recall — Search memories by words
 
-Search across all memories (global + every registered Claude Code project) for the entries most relevant to the query.
+Find the memories most relevant to the query across the global layer, every project memory of the active account and its observation buffer.
 
 **Query:** $ARGUMENTS
 
 ## Procedure
 
-Run via Bash the following Python one-shot (handles robust parsing of basic-memory output, which sometimes contains control chars that break jq):
+1. **Build the pattern.** Pick 3-8 words a memory about the topic would contain: the key nouns and identifiers, their synonyms, and the same words in the other language the user writes in (Italian and English here). Use stems to cover plurals and variants (`proiettor` matches proiettore and proiettori). Join them with `|`.
 
-```bash
-python3 <<'PY'
-import json, os, subprocess
+2. **Search** via Bash. Add as extra arguments any other memory folder the user's `CLAUDE.md` lists for the active account:
+   ```bash
+   "${CLAUDE_PLUGIN_ROOT}/scripts/recall.sh" '<word1>|<word2>|<word3>'
+   ```
+   Each output line is: matching lines, file path, description. Files with more matching lines come first.
 
-QUERY = """$ARGUMENTS"""
-GLOBAL_PROJECT = os.environ.get('PM_GLOBAL_PROJECT', 'persistmind-global')
+3. **Retry once if thin.** No result, or only weak ones: search again with other words (synonyms, the other language, a broader term).
 
-# Multi-account aware: honors BASIC_MEMORY_CONFIG_DIR when set by wrapper aliases.
-bm_dir = os.path.expanduser(os.environ.get('BASIC_MEMORY_CONFIG_DIR') or '~/.basic-memory')
-with open(os.path.join(bm_dir, 'config.json')) as f:
-    cfg = json.load(f)
-projects = [n for n in cfg.get('projects', {}) if n != 'main']
+4. **Read before answering.** Open the 2-4 most promising files and answer from what they say, not from the description alone. Notes under `observations/` record a past session (prompts, files touched); the date is in their file name.
 
-all_hits = []
-fails = []
-for proj in projects:
-    try:
-        out = subprocess.check_output(
-            ['basic-memory', 'tool', 'search-notes', QUERY, '--project', proj],
-            stderr=subprocess.DEVNULL, text=True, timeout=15
-        )
-        data = json.loads(out)
-        for r in data.get('results', []):
-            if r.get('score', 0) > 0.5:
-                all_hits.append({
-                    'scope': 'global' if proj == GLOBAL_PROJECT else proj,
-                    'title': r.get('title', ''),
-                    'file': r.get('file_path', ''),
-                    'score': round(r.get('score', 0), 2),
-                    'excerpt': (r.get('matched_chunk') or r.get('content') or '').replace('\n', ' ')[:120]
-                })
-    except Exception as e:
-        fails.append((proj, str(e)[:60]))
+5. **Present** the results as a Markdown table:
 
-all_hits.sort(key=lambda x: -x['score'])
-print(f"Total hits: {len(all_hits)} across {len(projects)} projects")
-print()
-for i, h in enumerate(all_hits[:10], 1):
-    print(f"{i:2}. [{h['scope']}] {h['title']} - score {h['score']}")
-    print(f"     file: {h['file']}")
-    print(f"     {h['excerpt']}")
-if fails:
-    print(f"\n!! {len(fails)} projects failed: {fails}")
-PY
-```
+| # | Scope | File | Why it matches |
+|---|---|---|---|
 
-Then present the results to the user as a Markdown table:
-
-| Rank | Scope | Slug | Score | Excerpt |
-|---|---|---|---|---|
+Scope is `global` for `~/.claude/memory/`, the project name for `projects/<slug>/memory/`, `observations` for the observation buffer.
 
 ## Suggest follow-up actions when relevant
 - "Want me to open the full file?"
@@ -70,6 +36,5 @@ Then present the results to the user as a Markdown table:
 - "No match → want me to `/pm-remember-global <topic>` to write it?"
 
 ## Constraints
-- Maximum 10 hits in the table.
-- Minimum score 0.5.
-- Do not query the `main` project (basic-memory's default, not used by persistmind).
+- Maximum 10 rows in the table.
+- Do not invent matches: if nothing fits, say so and list the words you searched.

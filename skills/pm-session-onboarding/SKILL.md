@@ -21,15 +21,15 @@ At the start of a session, or on request, summarize the current project state fr
 
    - **Project:** read `$CLAUDE_DIR/projects/<slug>/memory/MEMORY.md` (if it exists). If missing, tell the user.
 
-   - **Recent activity:** run via Bash against TWO projects (global + current):
+   - **Recent activity:** the five most recently changed fragments of each layer, via Bash:
      ```bash
+     CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
      # global
-     basic-memory tool recent-activity --page-size 5 --project "${PM_GLOBAL_PROJECT:-persistmind-global}"
-     # current project — derive the slug from cwd
-     # (e.g. /home/dev/my-project → "my-project" or encoded form "-home-dev-my-project")
-     basic-memory tool recent-activity --page-size 5 --project <slug>
+     ls -t ~/.claude/memory/persistmind/*.md | grep -v '/MEMORY.md$' | head -5
+     # current project: <slug> is the cwd with every non-alphanumeric character turned into "-"
+     # (e.g. /home/dev/my-project → "-home-dev-my-project")
+     ls -t "$CLAUDE_DIR/projects/<slug>/memory/"*.md | grep -v '/MEMORY.md$' | head -5
      ```
-     To get the current project's slug, read `${BASIC_MEMORY_CONFIG_DIR:-~/.basic-memory}/config.json` and find the entry whose `path` matches `$CLAUDE_DIR/projects/<encoded-cwd>/memory`.
 
 3. **Compose the brief in 3 sections:**
 

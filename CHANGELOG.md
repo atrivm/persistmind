@@ -4,6 +4,19 @@ All notable changes to persistmind will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+
+- **basic-memory.** The plugin no longer starts a basic-memory MCP server in every session (`.mcp.json` is gone), no longer reindexes after each memory write or at session start, and no longer needs basic-memory installed. Over six weeks the model sent it 68 queries, almost all with exact words or file names, while "do you remember…?" questions were answered with grep over the files and the observation buffer; meanwhile basic-memory was behind most of the maintenance (0.3.1, 0.3.2, 0.4.0, 0.4.1).
+- `hooks/reindex_memory.py`, with the description check of 0.4.1 it carried (it guarded basic-memory's frontmatter parsing), and `scripts/fix_suffixed_permalinks.py`. `hooks/reindex_memory.sh` stays as a no-op for sessions opened before 0.6.0: their hook list still calls it after each Write/Edit. It goes in a later release.
+- The env vars `PM_GLOBAL_PROJECT`, `PM_BASIC_MEMORY_BIN`, `PM_OBSERVATIONS_PROJECT`, and the use of `BASIC_MEMORY_CONFIG_DIR`.
+
+### Changed
+
+- **Recall is a word search.** `scripts/recall.sh '<regex>' [extra-dir ...]` searches the global layer, every project memory of the active account and its observation buffer, files with the most matching lines first, and prints each file's description. `/pm-recall` and the `pm-knowledge-recall` skill build the pattern from several words (synonyms, both languages), retry once with other words, and read the best files before answering.
+- `pm-session-onboarding` lists the latest fragments with `ls -t`; `pm-memory-audit` finds duplicates with the word search and orphans by `[[link]]`; `/pm-promote` moves files with `mv`; `/pm-init` only creates the observation folder; the `SessionEnd` hook only writes its note.
+
 ## [0.5.0] - 2026-10-06
 
 ### Removed

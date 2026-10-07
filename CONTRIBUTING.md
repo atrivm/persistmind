@@ -37,13 +37,13 @@ Run before opening a PR. No external dependencies beyond `python3` and `jq`:
 
 ```bash
 # Bash syntax
-for f in hooks/*.sh; do bash -n "$f"; done
+for f in hooks/*.sh scripts/*.sh; do bash -n "$f"; done
 
 # Python syntax
 python3 -m py_compile hooks/*.py
 
 # JSON validity
-jq empty .claude-plugin/plugin.json .mcp.json
+jq empty .claude-plugin/plugin.json hooks/hooks.json
 
 # Frontmatter presence (commands, skills, templates)
 for f in commands/*.md skills/*/SKILL.md templates/rules/*.md; do
@@ -64,7 +64,7 @@ Static validation cannot exercise the install flow, the wizard's interactive ste
 ### Install — macOS
 
 1. Create a clean user account (System Settings → Users) or a fresh macOS VM.
-2. Install Claude Code and `basic-memory` (`pipx install basic-memory`).
+2. Install Claude Code.
 3. `/plugin install persistmind` (or use the symlink method above).
 4. `/pm-init` — walk through all three steps. Verify:
    - `~/.claude/CLAUDE.md` gains a single `<!-- PERSISTMIND START -->` ... `<!-- PERSISTMIND END -->` block.
@@ -82,7 +82,7 @@ After `/pm-init`:
 
 - `/pm-remember "test fact"` writes a project-scoped fragment.
 - `/pm-remember-global "test rule"` writes a global fragment.
-- `/pm-recall test` returns both via semantic search.
+- `/pm-recall test` returns both.
 - `/pm-forget <slug>` backs up to `~/.claude/backups/` before deletion.
 
 ### Hooks
@@ -97,7 +97,7 @@ Conventional Commits in English:
 
 ```
 feat: add /pm-init wizard
-fix: handle missing basic-memory binary gracefully
+fix: skip observation notes for sessions without prompts
 docs: clarify memory layer routing in ARCHITECTURE.md
 refactor: extract hook bootstrap into shared script
 chore: bump CHANGELOG for v0.1.0
@@ -117,5 +117,4 @@ Please include:
 
 - OS and version (`uname -a`).
 - Claude Code version.
-- `basic-memory --version`.
 - Minimal reproduction.

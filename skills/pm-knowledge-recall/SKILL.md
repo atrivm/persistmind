@@ -1,6 +1,6 @@
 ---
 name: pm-knowledge-recall
-description: When the user references past work or asks if something was previously discussed, decided, or built — phrases like "did we already do X?", "did we decide on Y?", "remember when...", "did we try...", "was there a solution for...", "I don't remember if...", "have we seen this error before?". Triggers semantic search across all memory layers (global + all projects) and presents matching results with relevance.
+description: When the user references past work or asks if something was previously discussed, decided, or built — phrases like "did we already do X?", "did we decide on Y?", "remember when...", "did we try...", "was there a solution for...", "I don't remember if...", "have we seen this error before?". Searches every memory layer by words (global, all projects, observation buffer), reads the best matches and answers from them.
 metadata:
   version: 1.0.0
 ---
@@ -9,7 +9,7 @@ metadata:
 
 > **Path convention:** `$CLAUDE_DIR` = `${CLAUDE_CONFIG_DIR:-$HOME/.claude}` (active Claude Code config dir). Default `~/.claude`; multi-account setups like `claude-work` set it to `~/.claude-work`. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless.
 
-When the user wonders if something has already been done/seen/decided, run a semantic search and surface what memory knows.
+When the user wonders if something has already been done/seen/decided, search the memory files and surface what memory knows.
 
 ## Trigger patterns (recognize these formulations)
 
@@ -27,34 +27,25 @@ Recognize the equivalent phrases in the user's working language.
 
 ## Procedure
 
-1. **Extract the query.** From the user's sentence, pull 3-7 meaningful keywords (nouns, specific verbs, technical identifiers). Discard conversational filler ("did we", "remember", etc.).
+1. **Build the pattern.** From the user's sentence pull 3-8 words a memory about it would contain: nouns, specific verbs, technical identifiers, their synonyms, and the same words in the other language the user writes in (Italian and English here). Use stems for plurals and variants (`proiettor` matches proiettore and proiettori). Discard conversational filler ("did we", "remember", etc.). Join them with `|`.
 
-2. **Primary semantic search.** Via the basic-memory MCP tool:
-   ```
-   mcp__plugin_persistmind_basic-memory__search_notes(query="<keywords>", limit=10)
-   ```
-   If unavailable, fall back via Bash:
+2. **Search** via Bash, adding as extra arguments any other memory folder the user's `CLAUDE.md` lists for the active account:
    ```bash
-   basic-memory tool search-notes "<keywords>" | head -100
+   "${CLAUDE_PLUGIN_ROOT}/scripts/recall.sh" '<word1>|<word2>|<word3>'
    ```
+   It searches the global layer, every project memory of `$CLAUDE_DIR` and its observation buffer. Each output line is: matching lines, file path, description; files with more matching lines come first.
 
-3. **Parallel text search.** To avoid false negatives, also:
-   ```bash
-   CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-   grep -ril -E "<keyword1>|<keyword2>" ~/.claude/memory/ "$CLAUDE_DIR"/projects/*/memory/ 2>/dev/null | head -10
-   ```
+3. **Retry once if thin.** No result, or only weak ones: search again with other words (synonyms, the other language, a broader term).
 
-4. **Dedupe and rank.** Combine the results, dedupe by file_path. Sort by score (semantic primary, then fallback recency).
+4. **Read the best matches.** Open the 2-4 most promising files and answer from their content. Notes under `observations/` record a past session (prompts, files touched); the date is in their file name.
 
-5. **Relevance filter.** Drop entries with score < 0.4 (below that threshold is usually noise).
-
-6. **Compose the answer:**
+5. **Compose the answer:**
 
    If ≥1 relevant matches:
    ```markdown
    **Yes, there's memory on this:**
 
-   1. **<title>** (<scope>, <type>, score <X.XX>)
+   1. **<title>** (<scope>, <type>)
       <2-3 line excerpt>
 
    2. **<title>** (...)

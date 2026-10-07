@@ -1,6 +1,6 @@
 ---
 name: pm-memory-audit
-description: 'When the user wants to review, clean up, deduplicate, or audit the persistent memory system — phrases like "clean up memory", "audit memories", "stale memories", "duplicate memories", "review global memory", "review project memory", "any contradictions?", "check memory". Runs structural checks on the memory store: stale entries (no recall in 6 months), duplicates (cosine similarity > 0.92), orphans (no incoming/outgoing links), conflicts (contradictory rules).'
+description: 'When the user wants to review, clean up, deduplicate, or audit the persistent memory system — phrases like "clean up memory", "audit memories", "stale memories", "duplicate memories", "review global memory", "review project memory", "any contradictions?", "check memory". Runs structural checks on the memory store: stale entries (unchanged and unlinked for 6 months), duplicates (same topic in two fragments), orphans (no incoming/outgoing links), conflicts (contradictory rules).'
 metadata:
   version: 1.0.0
 ---
@@ -40,20 +40,28 @@ Memories with `metadata.created` > 180 days ago, never updated. Pseudo-code:
 ```bash
 find <path> -name "*.md" -mtime +180 -print
 ```
-For each stale entry, check with basic-memory whether it has ever been recalled. Zero hits + old age → flag.
+For each stale entry, check whether another memory links to it: `grep -rlF "[[<slug>]]" ~/.claude/memory "$CLAUDE_DIR"/projects/*/memory`. No link + old age → flag.
 
 ### 4. Duplicate check
 
-For each memory, run a semantic query using its `description` as input. If the top match other than itself has score > 0.92, it's likely a duplicate.
+For each memory, search with the key words of its `description`. Another file near the top on the same topic → read both: the same rule or fact is likely a duplicate.
 
 ```bash
-basic-memory tool search-notes "<description>" --limit 3
+"${CLAUDE_PLUGIN_ROOT}/scripts/recall.sh" '<word1>|<word2>|<word3>'
 ```
 
-### 5. Orphan check (basic-memory native)
+### 5. Orphan check
+
+A fragment that no other memory links to with `[[<slug>]]` and that links to none itself:
 
 ```bash
-basic-memory orphans
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+for f in <path>/*.md; do
+  slug=$(grep -m1 '^name:' "$f" | sed 's/^name: *//')
+  [ -z "$slug" ] && continue
+  others=$(grep -rlF "[[$slug]]" ~/.claude/memory "$CLAUDE_DIR"/projects/*/memory 2>/dev/null | grep -vF "$f")
+  [ -z "$others" ] && ! grep -q '\[\[' "$f" && echo "orphan: $f"
+done
 ```
 
 ### 6. Conflict check
@@ -67,15 +75,15 @@ Compose a table:
 ```markdown
 ## Memory audit — <date>
 
-### Stale (no recall in 6 months)
+### Stale (unchanged and unlinked for 6 months)
 | Memory | Age | Scope | Suggested action |
 |---|---|---|---|
 | feedback_old_X | 8 months | global | review or /pm-forget |
 
-### Duplicates (cosine > 0.92)
-| Memory A | Memory B | Score |
+### Duplicates (same topic)
+| Memory A | Memory B | Why |
 |---|---|---|
-| ... | ... | 0.94 |
+| ... | ... | same rule on <topic> |
 
 ### Orphans
 | Memory | No in/out links |

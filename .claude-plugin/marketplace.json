@@ -12,7 +12,7 @@
       "name": "persistmind",
       "version": "0.5.0",
       "source": "./",
-      "description": "Persistent memory framework for Claude Code. Three-layer architecture (user global, per-project, observation buffer), slash commands for capture and recall, deterministic hooks for automatic context injection, and skills for memory curation."
+      "description": "Persistent memory framework for Claude Code. Three-layer architecture (user global, per-project, observation buffer), slash commands for capture and recall, deterministic hooks for session capture and git safety, and skills for memory curation."
     }
   ]
 }

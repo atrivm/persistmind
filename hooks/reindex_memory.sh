@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# PostToolUse (Write/Edit) and SessionStart hook — reindexes basic-memory
-# projects in the background, one run at a time. Forwards stdin (Claude Code
-# JSON event) and arguments to the Python implementation.
-exec python3 "$(dirname "$0")/reindex_memory.py" "$@"
+# No-op kept for sessions opened before 0.6.0: their hook list still runs this
+# script after each Write/Edit and at session start. basic-memory is gone, so
+# there is nothing to reindex. Remove once no session older than 0.6.0 runs.
+cat >/dev/null 2>&1
+exit 0

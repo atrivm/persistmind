@@ -12,7 +12,7 @@ persistmind treats long-term memory as a **layered store of typed Markdown fragm
 | **Project** | `${CLAUDE_CONFIG_DIR:-~/.claude}/projects/<slug>/memory/` | Decisions, pivots, constraints scoped to one codebase |
 | **Observation buffer** | `${CLAUDE_CONFIG_DIR:-~/.claude}/observations/` | One auto-captured note per session — searchable, never auto-injected |
 
-Each layer is a directory of `.md` files with a `MEMORY.md` index at the top. Claude Code loads the current project's index at every session start (its auto memory), and loads whole the global fragments linked into `~/.claude/rules/` (pinned rules). Everything else is read on demand (by the user, by Claude, or via semantic search).
+Each layer is a directory of `.md` files with a `MEMORY.md` index at the top. Claude Code loads the current project's index at every session start (its auto memory), and loads whole the global fragments linked into `~/.claude/rules/` (pinned rules). Everything else is read on demand (by the user, by Claude, or via `/pm-recall`).
 
 The split exists so that a rule learned in one project (e.g. "never `--no-verify`") can live globally and apply everywhere, while a rule specific to one codebase (e.g. "migrations must be reversible") stays in that project's scope.
 
@@ -43,7 +43,7 @@ The split exists so that a rule learned in one project (e.g. "never `--no-verify
 
 The `SessionEnd` hook (`hooks/capture_observation.sh`) writes one Markdown note per session into `~/.claude/observations/<project-slug>/`. It is **deterministic**: it parses the session transcript and records what is already there — the user prompts, a per-tool usage count, and the files touched (`Edit`/`Write`/`MultiEdit`/`NotebookEdit`). No LLM runs in the hook; intelligent distillation stays the job of `/pm-checkpoint`.
 
-These notes are registered as the `persistmind-observations` basic-memory project, so `/pm-recall` searches them alongside the curated layers. They are never loaded automatically — the buffer is queried on demand, not pushed into every session. Sessions with no real user prompts are skipped to avoid noise.
+`/pm-recall` searches these notes alongside the curated layers. They are never loaded automatically — the buffer is queried on demand, not pushed into every session. Sessions with no real user prompts are skipped to avoid noise.
 
 ## Memory format
 
@@ -62,11 +62,11 @@ metadata:
 ---
 ```
 
-The description stays between double quotes: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter and prepends a block of its own) and a ` #` cuts it short.
+The description stays between double quotes: unquoted, a `: ` in it makes the YAML invalid and a ` #` cuts it short.
 
 ### Pinned rules
 
-A rule that must reach every session is linked into Claude Code's user rules folder: `ln -s ~/.claude/memory/persistmind/<file>.md ~/.claude/rules/`. Claude Code loads each rule file whole at session start and drops its frontmatter, so the fragment stays the single source and basic-memory keeps indexing it.
+A rule that must reach every session is linked into Claude Code's user rules folder: `ln -s ~/.claude/memory/persistmind/<file>.md ~/.claude/rules/`. Claude Code loads each rule file whole at session start and drops its frontmatter, so the fragment stays the single source and `/pm-recall` still finds it.
 
 Up to 0.4.1 a `UserPromptSubmit` hook injected fragments marked `always_inject: true` on every prompt. Claude Code saves hook output above 10,000 characters to a file and puts only its first 2,000 characters in context, so past a few pinned rules the model saw only the start of the first one. The flag is no longer read.
 
@@ -83,31 +83,9 @@ Fragments link to each other with `[[slug]]` wiki-link syntax. A `[[slug]]` that
 
 ## Plugin manifest
 
-persistmind is a standard Claude Code plugin. Two manifest files at the repo root:
+persistmind is a standard Claude Code plugin. Its manifest is `.claude-plugin/plugin.json`: name, version, description, author, keywords. The Claude Code marketplace and `/plugin install` use it.
 
-### `.claude-plugin/plugin.json`
-
-Declares metadata: name, version, description, author, keywords. The Claude Code marketplace and `/plugin install` use this.
-
-### `.mcp.json`
-
-Declares the MCP server stack the plugin depends on. persistmind registers exactly one:
-
-```json
-{
-  "mcpServers": {
-    "basic-memory": {
-      "command": "basic-memory",
-      "args": ["mcp"],
-      "env": {"BASIC_MEMORY_SYNC_CHANGES": "false"}
-    }
-  }
-}
-```
-
-[basic-memory](https://github.com/basicmachines-co/basic-memory) is the semantic search backbone — it indexes the Markdown fragments and exposes search/recall via MCP tools. The plugin assumes `basic-memory` is on `$PATH` (configurable via `PM_BASIC_MEMORY_BIN`).
-
-`BASIC_MEMORY_SYNC_CHANGES=false` turns off the server's file watcher and its startup sync. Every Claude Code session starts its own server, and with the watcher on, all of them synced the same file at the same moment: the racing writers gave notes duplicate permalinks ending in `-1`, `-2` and failed each other's frontmatter writes. Indexing goes through `hooks/reindex_memory.py` instead (see Hooks), which runs one `basic-memory reindex` at a time on the whole machine.
+There is no `.mcp.json`: persistmind runs no MCP server and keeps no index. Up to 0.5.0 every session started a [basic-memory](https://github.com/basicmachines-co/basic-memory) server for semantic search; 0.6.0 replaced it with a word search over the files (`scripts/recall.sh`), because recall in practice already went through words and the index was the part that kept breaking.
 
 ## Components
 
@@ -121,7 +99,7 @@ Eight user-facing commands. They are the **only** code paths authorized to write
 | `/pm-remember` | Capture a fact in the current project |
 | `/pm-remember-global` | Capture a rule in the user global layer |
 | `/pm-checkpoint` | End-of-session: analyze conversation, propose what to save |
-| `/pm-recall` | Semantic search across all layers |
+| `/pm-recall` | Word search across all layers |
 | `/pm-distill` | Reduce a long conversation to consolidated facts (read-only) |
 | `/pm-promote` | Move a project memory to the global layer |
 | `/pm-forget` | Remove a memory after confirmation (backed up first) |
@@ -134,18 +112,17 @@ Six observer skills. They **read** the conversation and **propose** captures, bu
 |---|---|
 | `pm-memory-curator` | Any save intent — reshapes free-form input into typed fragment |
 | `pm-session-onboarding` | Session start with no specific task — produces brief from memory |
-| `pm-knowledge-recall` | "Did we already…?" / "Remember when…?" — semantic search |
+| `pm-knowledge-recall` | "Did we already…?" / "Remember when…?" — word search over the memory files |
 | `pm-decision-logger` | Detected architectural choice — proposes a `decision` memory |
 | `pm-pivot-detector` | Direction change contradicting a prior decision — proposes a `pivot` |
 | `pm-memory-audit` | "Clean up memory" / "any contradictions?" — stale/dup/conflict checks |
 
 ### Hooks (`hooks/`)
 
-Five deterministic hooks bound to Claude Code lifecycle events.
+Four deterministic hooks bound to Claude Code lifecycle events.
 
 | Hook | Event | Purpose |
 |---|---|---|
-| `reindex_memory.sh` → `.py` | `PostToolUse` (Write/Edit), `SessionStart` | Reindexes the project of a written memory file in the background; at session start, catches up every project. One reindex at a time machine-wide; changes arriving while one runs are folded into a single follow-up run |
 | `capture_observation.sh` → `.py` | `SessionEnd` | Writes one deterministic note per session into the observation buffer (Layer 3) |
 | `propose_checkpoint.sh` | `Stop` | Cross-platform notification suggesting `/pm-checkpoint` before `/clear` |
 | `block_dangerous_git.sh` | `PreToolUse` (Bash) | Blocks `--no-verify`, force-push on main, `--no-gpg-sign`, `Co-Authored-By` |
@@ -160,7 +137,7 @@ Ten universal `feedback`-type rule templates installed by `/pm-init` if the user
 ## Capture flow
 
 ```
-User intent → slash command → pm-memory-curator skill → typed fragment → MEMORY.md index updated → basic-memory reindex (PostToolUse hook)
+User intent → slash command → pm-memory-curator skill → typed fragment → MEMORY.md index updated
 ```
 
 Three invariants:
@@ -175,7 +152,7 @@ Two paths:
 
 **Automatic, at session start.** Claude Code itself loads the pinned rules (`~/.claude/rules/`) and the current project's `MEMORY.md` index; Claude reads the fragments the index lists when it needs them. persistmind adds no hook to this path.
 
-**On-demand, explicit.** `/pm-recall <topic>` runs a cross-project semantic search (every registered basic-memory project) and surfaces the top-ranked hits with scope and excerpt.
+**On demand.** `/pm-recall <topic>`, or the `pm-knowledge-recall` skill when the user asks about the past, runs `scripts/recall.sh`: a word search (several words, both languages) over the global layer, every project memory of the active account and its observation buffer, best matches first. Claude then reads the top files.
 
 ## Cross-platform behavior
 
@@ -194,9 +171,8 @@ Persistmind honors these env vars; defaults preserve the standard single-account
 | Var | Default | Purpose |
 |---|---|---|
 | `CLAUDE_CONFIG_DIR` | `~/.claude` | Active Claude Code config dir. Project memories (`<CLAUDE_CONFIG_DIR>/projects/...`) and observations (`<CLAUDE_CONFIG_DIR>/observations/`) are derived from it. Set by wrapper aliases (e.g. `claude-work`) for per-account isolation. The global layer (`~/.claude/memory/persistmind/`) stays shared regardless. |
-| `BASIC_MEMORY_CONFIG_DIR` | `~/.basic-memory` | Where persistmind looks up basic-memory's `config.json` (and subprocess invocations of basic-memory inherit). Pair with `CLAUDE_CONFIG_DIR` in a multi-account wrapper. |
-| `PM_GLOBAL_PROJECT` | `persistmind-global` | Name of the basic-memory project that backs the user global layer |
-| `PM_BASIC_MEMORY_BIN` | `basic-memory` | Binary name or path to invoke basic-memory (useful if installed via pipx with a non-`PATH` shim) |
+| `PM_OBSERVATIONS_ROOT` | `<CLAUDE_CONFIG_DIR>/observations` | Where the `SessionEnd` hook writes the observation buffer |
+| `PM_RECALL_LIMIT` | `15` | How many files `scripts/recall.sh` prints |
 
 Set them in your shell rc file or in Claude Code's environment.
 
@@ -206,10 +182,9 @@ Set them in your shell rc file or in Claude Code's environment.
 - **Typed fragments.** Each type has a documented shape so future memories stay consistent with past ones.
 - **Explicit writes.** Capture is always user-confirmed. No silent persistence.
 - **Layered scope.** Rules live as high up the stack as they generalize — and `/pm-promote` is the only path from project to global.
-- **Boring infrastructure.** A shell hook, a Python script, a Markdown file. No process supervisor, no daemon, no proprietary store.
+- **Boring infrastructure.** A shell hook, a Python script, a Markdown file. No process supervisor, no daemon, no index, no proprietary store.
 
 ## Further reading
 
 - [USAGE.md](./USAGE.md) — workflows and command-by-command walkthrough.
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — development setup and conventions.
-- [basic-memory docs](https://memory.basicmachines.co/) — the MCP backbone.

@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "basic-memory": {
-      "command": "basic-memory",
-      "args": ["mcp"],
-      "env": {"BASIC_MEMORY_SYNC_CHANGES": "false"}
-    }
-  }
-}

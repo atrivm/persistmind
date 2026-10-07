@@ -33,7 +33,7 @@ metadata:
   tags: [<2-4 tags>]
 ---
 ```
-Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid (basic-memory then ignores the whole frontmatter) and a ` #` cuts it short.
+Always write the description between double quotes, escaping any `"` inside it as `\"`: unquoted, a `: ` in it makes the YAML invalid and a ` #` cuts it short.
 
 3. **Generate the body:**
    - `feedback`: the rule, **Why:**, **How to apply:**.
@@ -47,11 +47,9 @@ Always write the description between double quotes, escaping any `"` inside it a
    - Feedback → `## Feedback (cross-project rules — distilled from projects)`
    - Reference → `## Reference`
 
-6. **Index and verify.** Run via Bash: `python3 "${CLAUDE_PLUGIN_ROOT}/hooks/reindex_memory.py" --path ~/.claude/memory/persistmind`. basic-memory does not watch files; the script reindexes the basic-memory project that covers the global layer (after any reindex already running) and prints its status, which must show `No changes`. If the script path does not exist, run `basic-memory reindex --project "${PM_GLOBAL_PROJECT:-persistmind-global}"` and `basic-memory status --project "${PM_GLOBAL_PROJECT:-persistmind-global}"` instead.
-
-7. **Confirm** in one line: "GLOBAL memory saved: `~/.claude/memory/persistmind/<file>` (type: <type>)".
+6. **Confirm** in one line: "GLOBAL memory saved: `~/.claude/memory/persistmind/<file>` (type: <type>)".
 
 ## Constraints
-- Do not duplicate. First search with `basic-memory tool search-notes "<topic>"` to check if a similar memory exists.
+- Do not duplicate. First search with `"${CLAUDE_PLUGIN_ROOT}/scripts/recall.sh" '<topic words>'` to check if a similar memory exists.
 - Global memories are ALWAYS in context: keep them short and actionable, no prose.
 - Never save credentials.
